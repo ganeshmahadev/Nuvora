@@ -31,10 +31,10 @@ export default function OnboardingStep3() {
         <div className="relative z-10 max-w-sm">
           <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-primary mb-6">Quiet Intelligence</p>
           <h1 className="text-[40px] leading-[48px] font-semibold tracking-[-0.02em] text-foreground">
-            Configure your visual calm.
+            Configure your <em>visual calm.</em>
           </h1>
           <p className="mt-4 text-[16px] leading-[24px] text-muted-foreground">
-            Decide how Nuvora communicates with you. We value your focus and data privacy.
+            Decide how Nuvora communicates with you. We value your focus and <em>data privacy.</em>
           </p>
           <div className="mt-10 w-48 h-48 rounded-full overflow-hidden bg-surface-container border border-border">
             <div className="w-full h-full" style={{ background: 'radial-gradient(circle at 40% 40%, #8ff5da 0%, #dee0ff 40%, #edecff 100%)' }} />

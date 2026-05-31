@@ -28,7 +28,7 @@ export default function OnboardingStep1() {
         <div className="absolute top-20 -left-10 w-64 h-64 rounded-full bg-ai/5 blur-2xl pointer-events-none" />
         <div className="relative z-10 max-w-sm">
           <h1 className="text-[40px] leading-[48px] font-semibold tracking-[-0.02em] text-foreground">
-            Let&apos;s personalise your precision health.
+            Let&apos;s personalise your <em>precision health.</em>
           </h1>
           <p className="mt-4 text-[16px] leading-[24px] text-muted-foreground">
             Nuvora adapts to your unique biology. Share the basics to begin your optimised health journey.

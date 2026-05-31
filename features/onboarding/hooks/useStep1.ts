@@ -11,7 +11,7 @@ export function useStep1() {
 
   const form = useForm({
     resolver: zodResolver(step1Schema),
-    defaultValues: { display_name: '', weight_kg: undefined as unknown as number, height_cm: undefined as unknown as number, age: undefined as unknown as number, gender: undefined as unknown as Step1Values['gender'] },
+    defaultValues: { display_name: '', weight_kg: undefined as unknown as number, height_cm: undefined as unknown as number, age: undefined as unknown as number, gender: '' as Step1Values['gender'] },
   })
 
   const mutation = useMutation({

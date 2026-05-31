@@ -22,21 +22,12 @@ export default function SignUpPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
-
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
-
+    if (error) { setError(error.message); setLoading(false); return }
     setSuccess(true)
     setLoading(false)
   }
@@ -46,32 +37,22 @@ export default function SignUpPage() {
     setError(null)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
-    if (error) {
-      setError(error.message)
-      setGoogleLoading(false)
-    }
+    if (error) { setError(error.message); setGoogleLoading(false) }
   }
 
   if (success) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-8">
+      <div className="min-h-[100dvh] flex items-center justify-center p-8 bg-surface">
         <motion.div className="text-center max-w-sm" {...fadeUp}>
-          <span className="material-symbols-outlined text-[48px] text-primary mb-4 block">
-            mark_email_read
-          </span>
+          <span className="material-symbols-outlined text-[48px] text-primary mb-4 block">mark_email_read</span>
           <h2 className="text-[24px] font-semibold tracking-[-0.01em] mb-2">Check your email</h2>
           <p className="text-muted-foreground text-[15px]">
             We sent a confirmation link to <strong className="text-foreground">{email}</strong>.
-            Click it to activate your account and start logging.
+            Click it to activate your account and <em>start your health journey.</em>
           </p>
-          <Link
-            href="/auth/sign-in"
-            className="mt-6 inline-block text-[14px] text-primary font-medium hover:underline"
-          >
+          <Link href="/auth/sign-in" className="mt-6 inline-block text-[14px] text-primary font-medium hover:underline">
             Back to sign in
           </Link>
         </motion.div>
@@ -80,52 +61,59 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] grid lg:grid-cols-2">
-      {/* Left — editorial panel */}
-      <motion.div
-        className="hidden lg:flex flex-col justify-between p-12"
-        style={{ backgroundColor: '#006958', color: '#ffffff' }}
+    <div className="min-h-[100dvh] flex flex-col md:flex-row">
+
+      {/* Left editorial panel */}
+      <motion.section
+        className="hidden md:flex md:w-5/12 lg:w-1/2 flex-col justify-center px-12 lg:px-20 bg-surface-container-low relative overflow-hidden"
         {...fadeUp}
       >
-        <div>
-          <span className="text-[12px] font-semibold tracking-[0.1em] uppercase opacity-70">
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+        <div className="absolute top-20 -left-10 w-64 h-64 rounded-full bg-ai/5 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 max-w-sm">
+          <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-primary mb-6">
             Nuvora Health
-          </span>
-        </div>
-        <div>
-          <p className="text-[40px] leading-[48px] font-semibold tracking-[-0.02em] max-w-xs">
-            21 days to understand your body.
           </p>
-          <p className="mt-4 text-[16px] leading-[24px] opacity-70 max-w-sm">
+          <h1 className="text-[40px] leading-[48px] font-semibold tracking-[-0.02em] text-foreground">
+            21 days to understand <em>your body.</em>
+          </h1>
+          <p className="mt-4 text-[16px] leading-[24px] text-muted-foreground">
             Users who log consistently for 3 weeks see an average 15% improvement in goal adherence.
           </p>
-        </div>
-        <div className="flex gap-6 text-[13px] opacity-60">
-          <span>256-bit encryption</span>
-          <span>GDPR compliant</span>
-          <span>Zero data selling</span>
-        </div>
-      </motion.div>
 
-      {/* Right — sign up form */}
-      <div className="flex items-center justify-center p-8">
+          <div className="mt-10 flex gap-10">
+            <div>
+              <p className="text-[40px] leading-[48px] font-semibold tabular-nums text-primary">21 Days</p>
+              <p className="mt-1 text-[11px] font-semibold tracking-[0.08em] uppercase text-muted-foreground">
+                To build a new<br />biological rhythm
+              </p>
+            </div>
+            <div>
+              <p className="text-[40px] leading-[48px] font-semibold tabular-nums text-primary">15%</p>
+              <p className="mt-1 text-[11px] font-semibold tracking-[0.08em] uppercase text-muted-foreground">
+                Average boost in<br />metabolic focus
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Right sign-up form */}
+      <section className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center px-6 md:px-16 lg:px-24 py-10 bg-surface">
         <motion.div className="w-full max-w-sm" {...fadeUpDelayed(0.05)}>
-          <div className="lg:hidden mb-8">
+
+          <div className="md:hidden mb-8">
             <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-primary">
               Nuvora Health
             </span>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-foreground">
-              Create your account
-            </h1>
-            <p className="mt-1 text-[15px] text-muted-foreground">
-              Free forever. No credit card required.
-            </p>
+            <h2 className="text-[28px] font-semibold tracking-[-0.02em] text-foreground">Create your account</h2>
+            <p className="mt-1 text-[15px] text-muted-foreground">Free forever. No credit card required.</p>
           </div>
 
-          {/* Google OAuth */}
           <Button
             type="button"
             variant="outline"
@@ -151,55 +139,26 @@ export default function SignUpPage() {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-[12px] uppercase tracking-wider">
-              <span className="bg-background px-3 text-muted-foreground font-medium">or</span>
+              <span className="bg-surface px-3 text-muted-foreground font-medium">or</span>
             </div>
           </div>
 
           <form onSubmit={handleEmailSignUp} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-[13px] font-medium">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="h-11"
-              />
+              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="h-11" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-[13px] font-medium">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Min. 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-                className="h-11"
-              />
+              <Input id="password" type="password" placeholder="Min. 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" className="h-11" />
             </div>
 
             {error && (
-              <p className="text-[13px] text-destructive bg-destructive/10 px-3 py-2 rounded-md">
-                {error}
-              </p>
+              <p className="text-[13px] text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>
             )}
 
-            <Button
-              type="submit"
-              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-medium"
-              disabled={loading || googleLoading}
-            >
-              {loading ? (
-                <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
-              ) : (
-                'Create account'
-              )}
+            <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-medium rounded-full" disabled={loading || googleLoading}>
+              {loading ? <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> : 'Create account'}
             </Button>
 
             <p className="text-[12px] text-center text-muted-foreground">
@@ -211,12 +170,10 @@ export default function SignUpPage() {
 
           <p className="mt-6 text-center text-[14px] text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/auth/sign-in" className="text-primary font-medium hover:underline">
-              Sign in
-            </Link>
+            <Link href="/auth/sign-in" className="text-primary font-medium hover:underline">Sign in</Link>
           </p>
         </motion.div>
-      </div>
+      </section>
     </div>
   )
 }

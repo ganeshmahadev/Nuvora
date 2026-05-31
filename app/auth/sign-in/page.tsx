@@ -23,13 +23,8 @@ export default function SignInPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
-    }
+    if (error) { setError(error.message); setLoading(false); return }
     router.push('/app')
     router.refresh()
   }
@@ -39,64 +34,65 @@ export default function SignInPage() {
     setError(null)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
-    if (error) {
-      setError(error.message)
-      setGoogleLoading(false)
-    }
+    if (error) { setError(error.message); setGoogleLoading(false) }
   }
 
   return (
-    <div className="min-h-[100dvh] grid lg:grid-cols-2">
-      {/* Left — editorial panel */}
-      <motion.div
-        className="hidden lg:flex flex-col justify-between p-12 bg-primary text-on-primary"
-        style={{ backgroundColor: '#006958', color: '#ffffff' }}
+    <div className="min-h-[100dvh] flex flex-col md:flex-row">
+
+      {/* Left editorial panel */}
+      <motion.section
+        className="hidden md:flex md:w-5/12 lg:w-1/2 flex-col justify-center px-12 lg:px-20 bg-surface-container-low relative overflow-hidden"
         {...fadeUp}
       >
-        <div>
-          <span className="text-[12px] font-semibold tracking-[0.1em] uppercase opacity-70">
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+        <div className="absolute top-20 -left-10 w-64 h-64 rounded-full bg-ai/5 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 max-w-sm">
+          <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-primary mb-6">
             Nuvora Health
-          </span>
-        </div>
-        <div>
-          <p className="text-[40px] leading-[48px] font-semibold tracking-[-0.02em] max-w-xs">
-            Know your health at a glance.
           </p>
-          <p className="mt-4 text-[16px] leading-[24px] opacity-70 max-w-sm">
+          <h1 className="text-[40px] leading-[48px] font-semibold tracking-[-0.02em] text-foreground">
+            Know your health <em>at a glance.</em>
+          </h1>
+          <p className="mt-4 text-[16px] leading-[24px] text-muted-foreground">
             Quiet Intelligence. Scandinavian precision tracking powered by multi-agent AI.
           </p>
-        </div>
-        <div className="flex gap-6 text-[13px] opacity-60">
-          <span>256-bit encryption</span>
-          <span>GDPR compliant</span>
-          <span>Zero data selling</span>
-        </div>
-      </motion.div>
 
-      {/* Right — sign in form */}
-      <div className="flex items-center justify-center p-8">
+          <div className="mt-10 flex flex-col gap-2 text-[13px] text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-primary">lock</span>
+              256-bit encryption
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+              GDPR compliant
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[16px] text-primary">block</span>
+              Zero data selling
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Right sign-in form */}
+      <section className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center px-6 md:px-16 lg:px-24 py-10 bg-surface">
         <motion.div className="w-full max-w-sm" {...fadeUpDelayed(0.05)}>
-          {/* Mobile brand mark */}
-          <div className="lg:hidden mb-8">
+
+          <div className="md:hidden mb-8">
             <span className="text-[12px] font-semibold tracking-[0.1em] uppercase text-primary">
               Nuvora Health
             </span>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-[28px] font-semibold tracking-[-0.02em] text-foreground">
-              Welcome back
-            </h1>
-            <p className="mt-1 text-[15px] text-muted-foreground">
-              Sign in to your Nuvora account
-            </p>
+            <h2 className="text-[28px] font-semibold tracking-[-0.02em] text-foreground">Welcome back</h2>
+            <p className="mt-1 text-[15px] text-muted-foreground">Sign in to your Nuvora account</p>
           </div>
 
-          {/* Google OAuth */}
           <Button
             type="button"
             variant="outline"
@@ -122,66 +118,35 @@ export default function SignInPage() {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-[12px] uppercase tracking-wider">
-              <span className="bg-background px-3 text-muted-foreground font-medium">or</span>
+              <span className="bg-surface px-3 text-muted-foreground font-medium">or</span>
             </div>
           </div>
 
-          {/* Email / password */}
           <form onSubmit={handleEmailSignIn} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-[13px] font-medium">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="h-11"
-              />
+              <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="h-11" />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-[13px] font-medium">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-                className="h-11"
-              />
+              <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" className="h-11" />
             </div>
 
             {error && (
-              <p className="text-[13px] text-destructive bg-destructive/10 px-3 py-2 rounded-md">
-                {error}
-              </p>
+              <p className="text-[13px] text-destructive bg-destructive/10 px-3 py-2 rounded-md">{error}</p>
             )}
 
-            <Button
-              type="submit"
-              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-medium"
-              disabled={loading || googleLoading}
-            >
-              {loading ? (
-                <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
-              ) : (
-                'Sign in'
-              )}
+            <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-medium rounded-full" disabled={loading || googleLoading}>
+              {loading ? <span className="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> : 'Sign in'}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-[14px] text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <Link href="/auth/sign-up" className="text-primary font-medium hover:underline">
-              Create one
-            </Link>
+            <Link href="/auth/sign-up" className="text-primary font-medium hover:underline">Create one</Link>
           </p>
         </motion.div>
-      </div>
+      </section>
     </div>
   )
 }

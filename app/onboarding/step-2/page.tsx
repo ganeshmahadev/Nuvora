@@ -51,10 +51,10 @@ export default function OnboardingStep2() {
         </div>
 
         <h1 className="text-[32px] md:text-[40px] leading-tight font-semibold tracking-[-0.02em] text-foreground mb-2">
-          Define your performance baselines.
+          Define your <em>performance baselines.</em>
         </h1>
         <p className="text-[16px] text-muted-foreground mb-10">
-          Your goals drive the AI synthesis. Select your primary focus to calibrate the dashboard.
+          Your goals drive the AI synthesis. Select your primary focus to <em>calibrate the dashboard.</em>
         </p>
 
         <p className="text-[11px] font-semibold tracking-[0.1em] uppercase text-muted-foreground mb-4">Primary Focus</p>
