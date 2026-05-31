@@ -9,9 +9,9 @@ import { step1Schema, type Step1Values } from '../schemas/onboarding.schema'
 export function useStep1() {
   const router = useRouter()
 
-  const form = useForm<Step1Values>({
+  const form = useForm({
     resolver: zodResolver(step1Schema),
-    defaultValues: { display_name: '', weight_kg: undefined, height_cm: undefined, age: undefined, gender: undefined },
+    defaultValues: { display_name: '', weight_kg: undefined as unknown as number, height_cm: undefined as unknown as number, age: undefined as unknown as number, gender: undefined as unknown as Step1Values['gender'] },
   })
 
   const mutation = useMutation({

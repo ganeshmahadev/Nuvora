@@ -2,11 +2,12 @@
 
 import { motion } from 'motion/react'
 import { useRouter } from 'next/navigation'
-import { Controller } from 'react-hook-form'
+import { type UseFormReturn, Controller } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { fadeUp, fadeUpDelayed } from '@/lib/utils/motion'
 import { useStep3 } from '@/features/onboarding/hooks/useStep3'
+import type { Step3Values } from '@/features/onboarding/schemas/onboarding.schema'
 
 const PREFERENCES = [
   { key: 'pref_morning_gist'    as const, label: 'Morning Health Gist',    description: 'A concise, silent briefing as you wake.' },
@@ -17,7 +18,7 @@ const PREFERENCES = [
 export default function OnboardingStep3() {
   const router = useRouter()
   const { form, mutation } = useStep3()
-  const { handleSubmit, control } = form
+  const { handleSubmit, control } = form as unknown as UseFormReturn<Step3Values>
 
   return (
     <div className="min-h-[calc(100dvh-4rem)] flex flex-col md:flex-row">

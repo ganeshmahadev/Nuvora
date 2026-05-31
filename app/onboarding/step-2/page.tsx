@@ -2,12 +2,13 @@
 
 import { motion } from 'motion/react'
 import { useRouter } from 'next/navigation'
-import { Controller } from 'react-hook-form'
+import { type UseFormReturn, Controller } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { fadeUp, fadeUpDelayed } from '@/lib/utils/motion'
 import { useStep2 } from '@/features/onboarding/hooks/useStep2'
 import type { PrimaryGoal, ActivityLevel } from '@/lib/utils/calories'
+import type { Step2Values } from '@/features/onboarding/schemas/onboarding.schema'
 
 const GOAL_CARDS: { value: PrimaryGoal; label: string; icon: string; description: string }[] = [
   { value: 'weight_loss',          label: 'Weight Loss',          icon: 'monitor_weight', description: 'Prioritise metabolic efficiency and fat oxidation.' },
@@ -27,7 +28,7 @@ const ACTIVITY_LEVELS: { value: ActivityLevel; label: string }[] = [
 export default function OnboardingStep2() {
   const router = useRouter()
   const { form, mutation, calibration } = useStep2()
-  const { handleSubmit, control, watch } = form
+  const { handleSubmit, control, watch } = form as unknown as UseFormReturn<Step2Values>
 
   const selectedGoal  = watch('primary_goal')
   const selectedActivity = watch('activity_level')
@@ -97,7 +98,10 @@ export default function OnboardingStep2() {
               <Slider
                 min={0} max={4} step={1}
                 value={[Math.max(0, ACTIVITY_LEVELS.findIndex(a => a.value === field.value))]}
-                onValueChange={([i]) => field.onChange(ACTIVITY_LEVELS[i].value)}
+                onValueChange={(v) => {
+                  const i = Array.isArray(v) ? (v as number[])[0] : (v as number)
+                  field.onChange(ACTIVITY_LEVELS[i].value)
+                }}
                 className="w-full"
               />
             )}

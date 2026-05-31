@@ -2,18 +2,19 @@
 
 import { motion } from 'motion/react'
 import { useRouter } from 'next/navigation'
-import { Controller } from 'react-hook-form'
+import { type UseFormReturn, Controller } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { fadeUp, fadeUpDelayed } from '@/lib/utils/motion'
 import { useStep1 } from '@/features/onboarding/hooks/useStep1'
+import type { Step1Values } from '@/features/onboarding/schemas/onboarding.schema'
 
 export default function OnboardingStep1() {
   const router = useRouter()
   const { form, mutation } = useStep1()
-  const { register, handleSubmit, control, formState: { errors } } = form
+  const { register, handleSubmit, control, formState: { errors } } = form as unknown as UseFormReturn<Step1Values>
 
   return (
     <div className="min-h-[calc(100dvh-4rem)] flex flex-col md:flex-row">
