@@ -1,7 +1,7 @@
 // app/api/onboarding/step-2/route.ts
 import { createClient } from '@/lib/supabase/server'
 import { step2Schema } from '@/features/onboarding/schemas/onboarding.schema'
-import { computeCalories } from '@/lib/utils/calories'
+import { computeCalories, type CalorieInputs } from '@/lib/utils/calories'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function PATCH(req: NextRequest) {
@@ -9,10 +9,13 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json()
+  let body: unknown
+  try { body = await req.json() } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
   const parsed = step2Schema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 })
+    return NextResponse.json({ error: parsed.error.issues }, { status: 422 })
   }
 
   const { data: profile } = await supabase
@@ -29,7 +32,7 @@ export async function PATCH(req: NextRequest) {
       weight_kg:      Number(profile.weight_kg),
       height_cm:      Number(profile.height_cm),
       age:            profile.age,
-      gender:         profile.gender as any,
+      gender:         profile.gender as CalorieInputs['gender'],
       activity_level: parsed.data.activity_level,
       primary_goal:   parsed.data.primary_goal,
     })
