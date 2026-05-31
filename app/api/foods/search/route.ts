@@ -1,6 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import type { FoodItem } from '@/lib/api/foods'
+import { FOOD_SELECT_FIELDS } from '@/lib/api/foods'
+
+interface FoodRow {
+  id: string
+  name: string
+  brand: string | null
+  calories_per_100g: number
+  protein_g: number
+  carb_g: number
+  fat_g: number
+  fiber_g: number | null
+  sodium_mg: number | null
+  vitamin_a_iu: number | null
+  vitamin_c_mg: number | null
+  iron_mg: number | null
+  zinc_mg: number | null
+  magnesium_mg: number | null
+  calcium_mg: number | null
+  potassium_mg: number | null
+  sugar_g: number | null
+  created_by: string | null
+  is_verified: boolean
+}
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -13,7 +35,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('foods')
-    .select('id, name, brand, calories_per_100g, protein_g, carb_g, fat_g, fiber_g, sodium_mg, created_by, is_verified')
+    .select(FOOD_SELECT_FIELDS)
     .or(`created_by.is.null,created_by.eq.${user.id}`)
 
   if (q) {
@@ -23,8 +45,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query.order('name').limit(limit)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Sort: user's custom foods first, then global catalog
-  const sorted = (data as FoodItem[]).sort((a, b) => {
+  const sorted = ((data ?? []) as unknown as FoodRow[]).sort((a, b) => {
     const aCustom = a.created_by !== null ? 0 : 1
     const bCustom = b.created_by !== null ? 0 : 1
     return aCustom - bCustom

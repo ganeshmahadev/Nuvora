@@ -34,13 +34,22 @@ export function FoodCardCompact({ food, onClick, className }: FoodCardCompactPro
         className,
       )}
     >
-      <div className="min-w-0">
-        <p className="text-[14px] font-medium text-fg truncate group-hover:text-primary transition-colors">
-          {food.name}
-        </p>
-        {food.brand && (
-          <p className="text-[12px] text-fg-subtle truncate">{food.brand}</p>
-        )}
+      <div className="min-w-0 flex items-center gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <p className="text-[14px] font-medium text-fg truncate group-hover:text-primary transition-colors">
+              {food.name}
+            </p>
+            {food.created_by !== null && (
+              <span className="shrink-0 text-[9px] font-bold uppercase tracking-[0.06em] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                Custom
+              </span>
+            )}
+          </div>
+          {food.brand && (
+            <p className="text-[12px] text-fg-subtle truncate">{food.brand}</p>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-1.5 flex-shrink-0">
