@@ -1,0 +1,194 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* ─── Fonts ─── */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-geist-sans);
+
+  /* ─── Backgrounds ─── */
+  --color-bg:                  #fbf8ff;
+  --color-surface:             #ffffff;
+  --color-surface-low:         #f4f2ff;
+  --color-surface-container:   #edecff;
+  --color-surface-high:        #e6e6ff;
+  --color-surface-highest:     #e0e0fa;
+
+  /* ─── Text ─── */
+  --color-fg:           #181a2c;
+  --color-fg-muted:     #3e4945;
+  --color-fg-subtle:    #6e7a75;
+
+  /* ─── Brand — Nuvora Emerald ─── */
+  --color-primary:            #006958;
+  --color-primary-container:  #00856f;
+  --color-primary-fixed:      #8ff5da;
+  --color-primary-fixed-dim:  #73d8bf;
+  --color-on-primary:         #ffffff;
+  --color-on-primary-fixed:   #002019;
+
+  /* ─── AI surfaces — Indigo ─── */
+  --color-ai:            #1c3fe7;
+  --color-ai-container:  #405cff;
+  --color-ai-fixed:      #dee0ff;
+  --color-ai-fixed-dim:  #bbc3ff;
+  --color-on-ai:         #ffffff;
+
+  /* ─── Tertiary — Neutral grey ─── */
+  --color-tertiary:            #5c5d5d;
+  --color-tertiary-container:  #747675;
+
+  /* ─── Semantic ─── */
+  --color-success:       #006958;
+  --color-success-soft:  #8ff5da;
+  --color-warning:       #b86e00;
+  --color-warning-soft:  #ffe0b2;
+  --color-error:         #ba1a1a;
+  --color-error-soft:    #ffdad6;
+  --color-on-error:      #ffffff;
+
+  /* ─── Borders ─── */
+  --color-border:        #bdc9c4;
+  --color-border-strong: #6e7a75;
+
+  /* ─── shadcn compatibility ─── */
+  --color-background:          var(--background);
+  --color-foreground:          var(--foreground);
+  --color-card:                var(--card);
+  --color-card-foreground:     var(--card-foreground);
+  --color-popover:             var(--popover);
+  --color-popover-foreground:  var(--popover-foreground);
+  --color-secondary:           var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:               var(--muted);
+  --color-muted-foreground:    var(--muted-foreground);
+  --color-accent:              var(--accent);
+  --color-accent-foreground:   var(--accent-foreground);
+  --color-destructive:         var(--destructive);
+  --color-ring:                var(--ring);
+  --color-input:               var(--input);
+  --color-primary-foreground:  var(--primary-foreground);
+
+  --color-sidebar-ring:               var(--sidebar-ring);
+  --color-sidebar-border:             var(--sidebar-border);
+  --color-sidebar-accent-foreground:  var(--sidebar-accent-foreground);
+  --color-sidebar-accent:             var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary:            var(--sidebar-primary);
+  --color-sidebar-foreground:         var(--sidebar-foreground);
+  --color-sidebar:                    var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  calc(var(--radius) * 0.8);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Nuvora palette mapped to shadcn tokens */
+  --background:  #fbf8ff;
+  --foreground:  #181a2c;
+  --card:        #ffffff;
+  --card-foreground: #181a2c;
+  --popover:     #ffffff;
+  --popover-foreground: #181a2c;
+  --primary:     #006958;
+  --primary-foreground: #ffffff;
+  --secondary:   #1c3fe7;
+  --secondary-foreground: #ffffff;
+  --muted:       #f4f2ff;
+  --muted-foreground: #3e4945;
+  --accent:      #f4f2ff;
+  --accent-foreground: #181a2c;
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border:      #bdc9c4;
+  --input:       #bdc9c4;
+  --ring:        #006958;
+  --radius:      0.625rem;
+
+  --chart-1: #006958;
+  --chart-2: #73d8bf;
+  --chart-3: #1c3fe7;
+  --chart-4: #bbc3ff;
+  --chart-5: #b86e00;
+
+  --sidebar:               #f4f2ff;
+  --sidebar-foreground:    #181a2c;
+  --sidebar-primary:       #006958;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent:        #edecff;
+  --sidebar-accent-foreground: #181a2c;
+  --sidebar-border:        #bdc9c4;
+  --sidebar-ring:          #006958;
+}
+
+.dark {
+  --background:  #0f1116;
+  --foreground:  #f1efff;
+  --card:        #181a2c;
+  --card-foreground: #f1efff;
+  --popover:     #181a2c;
+  --popover-foreground: #f1efff;
+  --primary:     #73d8bf;
+  --primary-foreground: #002019;
+  --secondary:   #bbc3ff;
+  --secondary-foreground: #181a2c;
+  --muted:       #2d2f42;
+  --muted-foreground: #bdc9c4;
+  --accent:      #2d2f42;
+  --accent-foreground: #f1efff;
+  --destructive: #ffdad6;
+  --destructive-foreground: #ba1a1a;
+  --border:      #3e4945;
+  --input:       #3e4945;
+  --ring:        #73d8bf;
+
+  --sidebar:               #181a2c;
+  --sidebar-foreground:    #f1efff;
+  --sidebar-primary:       #73d8bf;
+  --sidebar-primary-foreground: #002019;
+  --sidebar-accent:        #2d2f42;
+  --sidebar-accent-foreground: #f1efff;
+  --sidebar-border:        #3e4945;
+  --sidebar-ring:          #73d8bf;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Material Symbols Outlined — variable font axes */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+  user-select: none;
+}
+
+/* Tabular numerals utility */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,35 @@
+# Core
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.2
+pydantic-settings==2.5.2
+python-dotenv==1.0.1
+
+# LangGraph stack (let pip resolve compatible versions)
+langgraph==0.4.8
+langgraph-checkpoint-postgres
+langchain
+langchain-core
+langchain-openai
+langchain-anthropic
+
+# Checkpointer dependencies
+psycopg[binary,pool]==3.2.3
+asyncpg==0.30.0
+
+# Observability
+langsmith
+
+# Supabase access from Python service
+supabase
+
+# Reliability
+tenacity==9.0.0
+httpx
+
+# Logging
+structlog==24.4.0
+
+# Testing
+pytest==8.3.3
+pytest-asyncio==0.24.0

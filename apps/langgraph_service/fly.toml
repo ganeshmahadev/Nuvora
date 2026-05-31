@@ -1,0 +1,33 @@
+app = "nuvora-langgraph"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8000"
+  ENVIRONMENT = "production"
+  LANGSMITH_TRACING = "true"
+  LANGSMITH_PROJECT = "nuvora-prod"
+  PRIMARY_LLM = "openai:gpt-4o-mini"
+  FALLBACK_LLM = "anthropic:claude-sonnet-4-5"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/healthz"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024
