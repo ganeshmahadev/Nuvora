@@ -1,6 +1,6 @@
 export default function DashboardPage() {
   return (
-    <div className="flex items-center justify-center h-full min-h-[calc(100dvh-3.5rem)] md:min-h-full">
+    <div className="flex items-center justify-center h-full min-h-[calc(100dvh-4rem)] md:min-h-full">
       <div className="text-center max-w-sm px-6">
         <span
           className="material-symbols-outlined text-[48px] text-fg-subtle mb-4 block"

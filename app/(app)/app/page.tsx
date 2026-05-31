@@ -13,7 +13,7 @@ export default async function AppHomePage() {
   const name = profile?.display_name ?? user!.email?.split('@')[0] ?? 'there'
 
   return (
-    <div className="flex items-center justify-center h-full min-h-[calc(100dvh-3.5rem)] md:min-h-full">
+    <div className="flex items-center justify-center h-full min-h-[calc(100dvh-4rem)] md:min-h-full">
       <div className="text-center max-w-sm px-6">
         <span className="material-symbols-outlined text-[48px] text-primary mb-4 block"
           style={{ fontVariationSettings: "'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 48" }}>

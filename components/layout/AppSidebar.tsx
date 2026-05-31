@@ -2,10 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { NAV_GROUPS, SETTINGS_NAV_ITEM, type NavItem } from '@/lib/config/nav.config'
+
+const MOBILE_TABS: NavItem[] = [
+  { label: 'Home', href: '/app', icon: 'home' },
+  { label: 'Log', href: '/dashboard/log', icon: 'edit_note' },
+  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+  { label: 'Insights', href: '/dashboard/insights', icon: 'auto_awesome' },
+  { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+]
 
 interface AppSidebarProps {
   user: { name: string; email: string }
@@ -47,7 +54,6 @@ function NavLink({ item, pathname }: { item: NavItem; pathname: string }) {
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -116,62 +122,36 @@ export function AppSidebar({ user }: AppSidebarProps) {
         {sidebarContent}
       </aside>
 
-      {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 h-14 bg-surface border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-on-primary text-[11px] font-bold">N</span>
-          </div>
-          <span className="text-[14px] font-semibold tracking-[-0.02em] text-fg">Nuvora Health</span>
-        </div>
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="p-1.5 rounded-lg hover:bg-surface-low transition-colors"
-          aria-label="Open navigation"
-        >
-          <span
-            className="material-symbols-outlined text-[22px] text-fg-muted"
-            style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >
-            menu
-          </span>
-        </button>
-      </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <>
-          <div
-            className="md:hidden fixed inset-0 z-50 bg-fg/30 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="md:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-surface shadow-2xl">
-            <div className="flex items-center justify-between px-4 h-14 border-b border-border">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-                  <span className="text-on-primary text-[11px] font-bold">N</span>
-                </div>
-                <span className="text-[14px] font-semibold tracking-[-0.02em] text-fg">Nuvora Health</span>
-              </div>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-surface-low transition-colors"
-                aria-label="Close navigation"
+      {/* Mobile bottom tab bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex bg-surface border-t border-border h-16 safe-area-bottom">
+        {MOBILE_TABS.map((tab) => {
+          const active = isNavActive(pathname, tab.href)
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={cn(
+                'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors',
+                active ? 'text-primary' : 'text-fg-subtle',
+              )}
+            >
+              <span
+                className="material-symbols-outlined text-[22px] leading-none"
+                style={{
+                  fontVariationSettings: active
+                    ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+                    : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24",
+                }}
               >
-                <span
-                  className="material-symbols-outlined text-[22px] text-fg-muted"
-                  style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-                >
-                  close
-                </span>
-              </button>
-            </div>
-            <div className="h-[calc(100%-3.5rem)]" onClick={() => setMobileOpen(false)}>
-              {sidebarContent}
-            </div>
-          </aside>
-        </>
-      )}
+                {tab.icon}
+              </span>
+              <span className={cn('text-[10px] font-medium', active ? 'font-semibold' : '')}>
+                {tab.label}
+              </span>
+            </Link>
+          )
+        })}
+      </nav>
     </>
   )
 }
