@@ -1,26 +1,17 @@
 export interface NavItem {
   label: string
-  href: string
+  href?: string
   icon: string
+  children?: NavItem[]
 }
 
-export interface NavGroup {
-  label: string
-  items: NavItem[]
-}
-
-export const NAV_GROUPS: NavGroup[] = [
-  {
-    label: 'Overview',
-    items: [
-      { label: 'Home', href: '/app', icon: 'home' },
-      { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-    ],
-  },
+export const NAV_ITEMS: NavItem[] = [
+  { label: 'Home', href: '/app', icon: 'home' },
   {
     label: 'Log',
-    items: [
-      { label: 'Journal', href: '/dashboard/log', icon: 'edit_note' },
+    icon: 'edit_note',
+    children: [
+      { label: 'Journal', href: '/dashboard/log', icon: 'book_2' },
       { label: 'Meals', href: '/dashboard/log/meals', icon: 'restaurant' },
       { label: 'Water', href: '/dashboard/log/water', icon: 'water_drop' },
       { label: 'Sleep', href: '/dashboard/log/sleep', icon: 'bedtime' },
@@ -28,13 +19,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Weight', href: '/dashboard/log/weight', icon: 'monitor_weight' },
     ],
   },
-  {
-    label: 'Discover',
-    items: [
-      { label: 'History', href: '/dashboard/history', icon: 'history' },
-      { label: 'Insights', href: '/dashboard/insights', icon: 'auto_awesome' },
-    ],
-  },
+  { label: 'Insights', href: '/dashboard/insights', icon: 'auto_awesome' },
 ]
 
 export const SETTINGS_NAV_ITEM: NavItem = {
@@ -42,3 +27,10 @@ export const SETTINGS_NAV_ITEM: NavItem = {
   href: '/dashboard/settings',
   icon: 'settings',
 }
+
+export const MOBILE_TABS: NavItem[] = [
+  { label: 'Home', href: '/app', icon: 'home' },
+  { label: 'Log', href: '/dashboard/log', icon: 'edit_note' },
+  { label: 'Insights', href: '/dashboard/insights', icon: 'auto_awesome' },
+  { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+]

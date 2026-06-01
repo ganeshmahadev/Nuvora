@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { MealComposer } from '@/components/health/MealComposer'
 import { TodayMealsList } from '@/components/health/TodayMealsList'
 import { MealsInsightSidebar } from '@/components/health/MealsInsightSidebar'
+import { LogDatePicker } from '@/components/health/LogDatePicker'
 import Link from 'next/link'
 
 export default function MealLoggingPage() {
   const today = new Date().toISOString().split('T')[0]
-  const [date] = useState(today)
+  const [date, setDate] = useState(today)
   const [refreshKey, setRefreshKey] = useState(0)
 
   return (
@@ -27,16 +28,19 @@ export default function MealLoggingPage() {
       </Link>
 
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="material-symbols-outlined text-[24px] text-primary"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >
-            restaurant
-          </span>
-          <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[oklch(14%_0.012_260)]">
-            Log Nutrition
-          </h1>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <span
+              className="material-symbols-outlined text-[24px] text-primary"
+              style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+            >
+              restaurant
+            </span>
+            <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[oklch(14%_0.012_260)]">
+              Log Nutrition
+            </h1>
+          </div>
+          <LogDatePicker date={date} onChange={setDate} />
         </div>
         <p className="text-[15px] text-[oklch(48%_0.010_260)] max-w-2xl">
           Record your nutritional intake for metabolic precision. Data-driven fueling for optimal physiological performance.

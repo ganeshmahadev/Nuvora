@@ -10,6 +10,7 @@ import { ACTIVITY_TYPES, ACTIVITY_TYPE_ICONS, METRIC_CONFIGS } from '@/lib/confi
 import { cn } from '@/lib/utils'
 import { AiInsightCard } from '@/components/health/AiInsightCard'
 import Link from 'next/link'
+import { LogDatePicker } from '@/components/health/LogDatePicker'
 
 function ActivityForm({ date }: { date: string }) {
   const logActivity = useLogActivity()
@@ -190,7 +191,7 @@ function QuickLogRecent() {
 
 export default function ActivityLogContent() {
   const today = new Date().toISOString().split('T')[0]
-  const [date] = useState(today)
+  const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.activity
 
   return (
@@ -217,22 +218,7 @@ export default function ActivityLogContent() {
             Log Activity
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="p-2 rounded-full bg-[oklch(97%_0.005_90)] hover:bg-surface-container transition-colors">
-            <span
-              className="material-symbols-outlined text-[20px] text-[oklch(48%_0.010_260)]"
-              style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24" }}
-            >
-              calendar_today
-            </span>
-          </button>
-          <div className="text-right">
-            <p className="text-[14px] font-semibold text-[oklch(14%_0.012_260)]">Today</p>
-            <p className="text-[12px] text-[oklch(48%_0.010_260)]">
-              {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </p>
-          </div>
-        </div>
+        <LogDatePicker date={date} onChange={setDate} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">

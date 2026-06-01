@@ -9,6 +9,7 @@ import { MetricHistoryTable } from '@/components/health/MetricHistoryTable'
 import { AiInsightCard } from '@/components/health/AiInsightCard'
 import { METRIC_CONFIGS } from '@/lib/config/metrics.config'
 import Link from 'next/link'
+import { LogDatePicker } from '@/components/health/LogDatePicker'
 
 function SleepQualitySlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
@@ -183,7 +184,7 @@ function SleepForm({ date }: { date: string }) {
 
 export default function SleepLogContent() {
   const today = new Date().toISOString().split('T')[0]
-  const [date] = useState(today)
+  const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.sleep
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
@@ -207,16 +208,19 @@ export default function SleepLogContent() {
       </Link>
 
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="material-symbols-outlined text-[24px] text-[oklch(52%_0.150_270)]"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >
-            bedtime
-          </span>
-          <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[oklch(14%_0.012_260)]">
-            Log Sleep
-          </h1>
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <span
+              className="material-symbols-outlined text-[24px] text-[oklch(52%_0.150_270)]"
+              style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+            >
+              bedtime
+            </span>
+            <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-[oklch(14%_0.012_260)]">
+              Log Sleep
+            </h1>
+          </div>
+          <LogDatePicker date={date} onChange={setDate} />
         </div>
         <p className="text-[15px] text-[oklch(48%_0.010_260)]">Document your circadian rhythm and sleep quality.</p>
       </div>
