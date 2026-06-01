@@ -17,6 +17,7 @@ interface PendingItem {
   food: FoodItem
   quantityG: number
   totals: ReturnType<typeof computeTotals>
+  mealType: MealType
 }
 
 interface MealComposerProps {
@@ -38,7 +39,7 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
     const totals = computeTotals(food, quantityG)
     setPendingItems((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), food, quantityG, totals },
+      { id: crypto.randomUUID(), food, quantityG, totals, mealType },
     ])
   }
 
@@ -50,17 +51,20 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
     if (pendingItems.length === 0) return
     setSaving(true)
     try {
-      const meal = await createMealMutation.mutateAsync({
-        date,
-        meal_type: mealType,
-      })
-      const mealLogId = (meal as any).id
+      const byType = pendingItems.reduce((acc, item) => {
+        ;(acc[item.mealType] ??= []).push(item)
+        return acc
+      }, {} as Record<MealType, PendingItem[]>)
 
-      for (const item of pendingItems) {
-        await addItemMutation.mutateAsync({
-          mealLogId,
-          data: { food_id: item.food.id, quantity_g: item.quantityG },
-        })
+      for (const [type, items] of Object.entries(byType) as [MealType, PendingItem[]][]) {
+        const meal = await createMealMutation.mutateAsync({ date, meal_type: type })
+        const mealLogId = (meal as any).id
+        for (const item of items) {
+          await addItemMutation.mutateAsync({
+            mealLogId,
+            data: { food_id: item.food.id, quantity_g: item.quantityG },
+          })
+        }
       }
 
       setPendingItems([])
@@ -128,30 +132,42 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
 
       {pendingItems.length > 0 && (
         <div className="space-y-0.5">
-          {pendingItems.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-low transition-colors group">
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-medium text-fg truncate">{item.food.name}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[12px] text-fg-subtle tabular-nums">{item.quantityG}g</span>
-                  <span className="text-[12px] font-semibold tabular-nums text-fg">{item.totals.calories} kcal</span>
-                  <span className="text-[11px] text-primary tabular-nums">P {item.totals.protein_g}g</span>
-                  <span className="text-[11px] text-ai tabular-nums">C {item.totals.carb_g}g</span>
-                  <span className="text-[11px] text-warning tabular-nums">F {item.totals.fat_g}g</span>
+          {Object.entries(
+            pendingItems.reduce((acc, item) => {
+              ;(acc[item.mealType] ??= []).push(item)
+              return acc
+            }, {} as Record<MealType, PendingItem[]>)
+          ).map(([type, items]) => (
+            <div key={type}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-fg-subtle px-3 pt-2 pb-1">
+                {MEAL_TYPE_LABELS[type as MealType]}
+              </p>
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-low transition-colors group">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[14px] font-medium text-fg truncate">{item.food.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[12px] text-fg-subtle tabular-nums">{item.quantityG}g</span>
+                      <span className="text-[12px] font-semibold tabular-nums text-fg">{item.totals.calories} kcal</span>
+                      <span className="text-[11px] text-primary tabular-nums">P {item.totals.protein_g}g</span>
+                      <span className="text-[11px] text-ai tabular-nums">C {item.totals.carb_g}g</span>
+                      <span className="text-[11px] text-warning tabular-nums">F {item.totals.fat_g}g</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemovePending(item.id)}
+                    className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-surface-container text-fg-subtle hover:text-error transition-opacity shrink-0"
+                  >
+                    <span
+                      className="material-symbols-outlined text-[18px]"
+                      style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
+                    >
+                      close
+                    </span>
+                  </button>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleRemovePending(item.id)}
-                className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-surface-container text-fg-subtle hover:text-error transition-opacity shrink-0"
-              >
-                <span
-                  className="material-symbols-outlined text-[18px]"
-                  style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
-                >
-                  close
-                </span>
-              </button>
+              ))}
             </div>
           ))}
         </div>
@@ -177,7 +193,10 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
           disabled={saving}
           className="w-full bg-primary hover:bg-primary-container text-on-primary"
         >
-          {saving ? 'Saving…' : `Save ${MEAL_TYPE_LABELS[mealType].toLowerCase()}`}
+          {saving ? 'Saving…' : (() => {
+            const types = [...new Set(pendingItems.map((i) => i.mealType))]
+            return types.length > 1 ? 'Save meals' : `Save ${MEAL_TYPE_LABELS[types[0]].toLowerCase()}`
+          })()}
         </Button>
       )}
 

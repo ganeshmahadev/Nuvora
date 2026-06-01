@@ -1,7 +1,7 @@
 export interface FoodItem {
   id: string
   name: string
-  brand: string | null
+  serving_size_g: number | null
   calories_per_100g: number
   protein_g: number
   carb_g: number
@@ -21,7 +21,7 @@ export interface FoodItem {
 }
 
 export const FOOD_SELECT_FIELDS = [
-  'id', 'name', 'brand', 'calories_per_100g', 'protein_g', 'carb_g', 'fat_g',
+  'id', 'name', 'serving_size_g', 'calories_per_100g', 'protein_g', 'carb_g', 'fat_g',
   'fiber_g', 'sodium_mg', 'vitamin_a_iu', 'vitamin_c_mg', 'iron_mg',
   'zinc_mg', 'magnesium_mg', 'calcium_mg', 'potassium_mg', 'sugar_g',
   'created_by', 'is_verified',
@@ -147,7 +147,7 @@ export async function deleteCustomFood(id: string): Promise<void> {
 
 export type CreateFoodInput = {
   name: string
-  brand?: string | null
+  serving_size_g?: number | null
   calories_per_100g: number
   protein_g: number
   carb_g: number
@@ -173,11 +173,11 @@ export interface PredictedMacros {
   sodium_mg: number | null
 }
 
-export async function predictMacros(name: string, brand?: string | null): Promise<PredictedMacros> {
+export async function predictMacros(name: string): Promise<PredictedMacros> {
   const res = await fetch('/api/foods/predict', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, brand: brand ?? undefined }),
+    body: JSON.stringify({ name }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: 'Prediction failed' }))

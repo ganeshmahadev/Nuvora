@@ -8,6 +8,7 @@ import { logActivitySchema, type LogActivityValues } from '@/features/metrics/sc
 import { MetricHistoryTable } from '@/components/health/MetricHistoryTable'
 import { ACTIVITY_TYPES, ACTIVITY_TYPE_ICONS, METRIC_CONFIGS } from '@/lib/config/metrics.config'
 import { cn } from '@/lib/utils'
+import { AiInsightCard } from '@/components/health/AiInsightCard'
 import Link from 'next/link'
 
 function ActivityForm({ date }: { date: string }) {
@@ -244,21 +245,7 @@ export default function ActivityLogContent() {
 
         <div className="md:col-span-4 space-y-5">
           <QuickLogRecent />
-          <div className="p-4 rounded-xl border border-[oklch(52%_0.150_270)]/20 bg-surface-container-lowest shadow-[0_20px_40px_-15px_rgba(28,63,231,0.05)] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-[oklch(52%_0.150_270)]" />
-            <div className="flex items-center gap-1.5 mb-2 text-[oklch(52%_0.150_270)]">
-              <span
-                className="material-symbols-outlined text-[20px]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-              >
-                auto_awesome
-              </span>
-              <span className="text-[12px] font-bold uppercase tracking-[0.06em]">Smart Recommendation</span>
-            </div>
-            <p className="text-[15px] text-[oklch(14%_0.012_260)] leading-relaxed">
-              Based on your low sleep score (62/100) last night, we recommend a <strong className="text-primary">Zone 2 recovery session</strong> today instead of high-intensity intervals.
-            </p>
-          </div>
+          <AiInsightCard category="activity_recommendation" title="Smart Recommendation" icon="auto_awesome" fallbackDescription="Log activities and we'll analyze your training patterns, recovery needs, and suggest optimal training windows." />
         </div>
       </div>
     </div>

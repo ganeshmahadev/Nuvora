@@ -20,10 +20,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // Fall back to real-time aggregation for water when rollup is stale or missing
+  let totalWaterMl = rollup?.total_water_ml ?? null
+
+  const { data: waterLogs } = await supabase
+    .from('water_logs')
+    .select('amount_ml')
+    .eq('user_id', user.id)
+    .eq('date', date)
+
+  if (waterLogs && waterLogs.length > 0) {
+    const liveWaterTotal = waterLogs.reduce((sum: number, l: { amount_ml: number }) => sum + l.amount_ml, 0)
+    if (totalWaterMl === null || liveWaterTotal !== totalWaterMl) {
+      totalWaterMl = liveWaterTotal
+    }
+  } else if (!rollup) {
+    totalWaterMl = 0
+  }
+
   if (!rollup) {
     return NextResponse.json({
       date,
-      total_water_ml: null,
+      total_water_ml: totalWaterMl,
       weight_kg: null,
       sleep_duration_minutes: null,
       active_minutes: null,
@@ -31,5 +49,8 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  return NextResponse.json(rollup)
+  return NextResponse.json({
+    ...rollup,
+    total_water_ml: totalWaterMl ?? rollup.total_water_ml,
+  })
 }

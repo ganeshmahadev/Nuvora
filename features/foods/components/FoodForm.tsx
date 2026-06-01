@@ -48,14 +48,13 @@ export function FoodForm({ onSuccess, onCancel }: FoodFormProps) {
   })
 
   const foodName = watch('name')
-  const brandName = watch('brand')
 
   async function handlePredict() {
     if (!foodName?.trim()) return
     setPredicting(true)
     setPredictError(null)
     try {
-      const macros = await predictMacros(foodName, brandName)
+      const macros = await predictMacros(foodName)
       setValue('calories_per_100g', macros.calories_per_100g, { shouldValidate: true })
       setValue('protein_g', macros.protein_g, { shouldValidate: true })
       setValue('carb_g', macros.carb_g, { shouldValidate: true })
@@ -93,14 +92,17 @@ export function FoodForm({ onSuccess, onCancel }: FoodFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="brand" className="text-[12px] font-semibold uppercase tracking-[0.05em] text-fg-subtle">
-          Brand
+        <Label htmlFor="serving_size_g" className="text-[12px] font-semibold uppercase tracking-[0.05em] text-fg-subtle">
+          Serving size (g)
         </Label>
         <Input
-          id="brand"
-          {...register('brand')}
-          placeholder="e.g. Whole Foods"
-          className="mt-1.5"
+          id="serving_size_g"
+          type="number"
+          step="1"
+          min="1"
+          {...register('serving_size_g', { valueAsNumber: true })}
+          placeholder="e.g. 150"
+          className="mt-1.5 tabular-nums"
         />
       </div>
 

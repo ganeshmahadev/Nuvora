@@ -6,7 +6,7 @@ function optionalNumber() {
 
 export const createFoodSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200),
-  brand: z.string().max(100).optional().nullable(),
+  serving_size_g: z.number().positive().optional().nullable(),
   calories_per_100g: z.number().min(0, 'Must be 0 or more').max(9999),
   protein_g: z.number().min(0).max(999),
   carb_g: z.number().min(0).max(999),
@@ -25,7 +25,7 @@ export const createFoodSchema = z.object({
 
 export const updateFoodSchema = z.object({
   name: z.string().min(1).max(200).optional(),
-  brand: z.string().max(100).optional().nullable(),
+  serving_size_g: z.number().positive().optional().nullable(),
   calories_per_100g: z.number().min(0).max(9999).optional(),
   protein_g: z.number().min(0).max(999).optional(),
   carb_g: z.number().min(0).max(999).optional(),

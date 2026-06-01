@@ -5,27 +5,18 @@ pydantic==2.9.2
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
 
-# LangGraph stack (let pip resolve compatible versions)
-langgraph==0.4.8
-langgraph-checkpoint-postgres
-langchain
-langchain-core
-langchain-openai
-langchain-anthropic
+# LLM
+openai>=1.40.0
+anthropic>=0.30.0
 
-# Checkpointer dependencies
-psycopg[binary,pool]==3.2.3
-asyncpg==0.30.0
-
-# Observability
-langsmith
-
-# Supabase access from Python service
+# Database — Supabase access via API (not direct Postgres)
 supabase
+
+# HTTP
+httpx
 
 # Reliability
 tenacity==9.0.0
-httpx
 
 # Logging
 structlog==24.4.0

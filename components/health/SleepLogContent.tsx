@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useLogSleep } from '@/features/metrics/hooks/useMetricLog'
+import { useLogSleep, useMetricHistory, type SleepEntry } from '@/features/metrics/hooks/useMetricLog'
 import { logSleepSchema, type LogSleepValues } from '@/features/metrics/schemas/metric.schema'
 import { MetricHistoryTable } from '@/components/health/MetricHistoryTable'
-import { AiInsightPlaceholder } from '@/components/health/AiInsightPlaceholder'
+import { AiInsightCard } from '@/components/health/AiInsightCard'
 import { METRIC_CONFIGS } from '@/lib/config/metrics.config'
 import Link from 'next/link'
 
@@ -41,17 +41,54 @@ function SleepQualitySlider({ value, onChange }: { value: number; onChange: (v: 
   )
 }
 
-function SleepScoreCircle() {
+function parseBedTimeMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  const mins = h * 60 + (m ?? 0)
+  return h < 6 ? mins + 1440 : mins
+}
+
+function calcSleepScore(entries: SleepEntry[]): number | null {
+  const valid = entries.filter((e) => e.duration_minutes != null)
+  if (valid.length < 2) return null
+
+  const entryScores = valid.map((e) => {
+    const hours = (e.duration_minutes ?? 0) / 60
+    const quality = e.subjective_quality ?? 5
+
+    let durScore: number
+    if (hours >= 7 && hours <= 9) durScore = 40
+    else if ((hours >= 6 && hours < 7) || (hours > 9 && hours <= 10)) durScore = 28
+    else if ((hours >= 5 && hours < 6) || hours > 10) durScore = 16
+    else durScore = 0
+
+    return durScore + (quality / 10) * 40
+  })
+
+  const bedTimes = valid.map((e) => parseBedTimeMinutes(e.bed_time ?? '23:00'))
+  const meanBed = bedTimes.reduce((a, b) => a + b, 0) / bedTimes.length
+  const stddev = Math.sqrt(bedTimes.reduce((s, t) => s + (t - meanBed) ** 2, 0) / bedTimes.length)
+  const consistScore = stddev < 30 ? 20 : stddev < 60 ? 14 : stddev < 90 ? 8 : 4
+
+  const avgEntry = entryScores.reduce((a, b) => a + b, 0) / entryScores.length
+  return Math.min(100, Math.round(avgEntry + consistScore))
+}
+
+function SleepScoreCircle({ score, count }: { score: number | null; count: number }) {
+  const display = score != null ? String(score) : '--'
   return (
     <div className="bg-[oklch(97%_0.005_90)] border border-[oklch(90%_0.005_260)] rounded-xl p-4 flex flex-col items-center justify-center text-center">
       <div className="w-28 h-28 rounded-full border-4 border-primary/20 flex items-center justify-center mb-2 relative">
-        <div className="absolute inset-0 rounded-full border-t-4 border-primary animate-[spin_3s_linear_infinite]" />
+        {score != null && (
+          <div className="absolute inset-0 rounded-full border-t-4 border-primary animate-[spin_3s_linear_infinite]" />
+        )}
         <div className="flex flex-col">
-          <span className="text-[48px] font-light tracking-[-0.04em] text-primary leading-none">82</span>
+          <span className="text-[48px] font-light tracking-[-0.04em] text-primary leading-none">{display}</span>
           <span className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[oklch(48%_0.010_260)]">Sleep Score</span>
         </div>
       </div>
-      <p className="text-[12px] text-[oklch(48%_0.010_260)]">Based on last 7 nights</p>
+      <p className="text-[12px] text-[oklch(48%_0.010_260)]">
+        {count >= 2 ? `Based on last ${count} night${count === 1 ? '' : 's'}` : 'Log 2+ nights to see your score'}
+      </p>
     </div>
   )
 }
@@ -149,6 +186,11 @@ export default function SleepLogContent() {
   const [date] = useState(today)
   const config = METRIC_CONFIGS.sleep
 
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+  const { data: sleepHistory } = useMetricHistory('sleep', sevenDaysAgo, today)
+  const entries = (sleepHistory ?? []) as SleepEntry[]
+  const sleepScore = calcSleepScore(entries)
+
   return (
     <div className="px-4 md:px-6 lg:px-8 py-6 max-w-[1280px] mx-auto">
       <Link
@@ -188,27 +230,8 @@ export default function SleepLogContent() {
         </div>
 
         <div className="lg:col-span-4 space-y-5">
-          <div className="bg-surface-container-lowest border border-[oklch(52%_0.150_270)]/20 p-5 rounded-xl relative overflow-hidden shadow-[0_20px_40px_rgba(28,63,231,0.08)]">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-[oklch(52%_0.150_270)]/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex items-center gap-2 mb-3 text-[oklch(52%_0.150_270)] relative z-10">
-              <span
-                className="material-symbols-outlined text-[20px]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-              >
-                auto_awesome
-              </span>
-              <h4 className="text-[14px] font-bold text-[oklch(52%_0.150_270)]">Biometric Insight</h4>
-            </div>
-            <p className="text-[15px] text-[oklch(14%_0.012_260)] leading-relaxed relative z-10">
-              Consistent wake times are trending toward a <span className="text-[oklch(52%_0.150_270)] font-bold">15% boost</span> in morning metabolic focus.
-            </p>
-            <div className="mt-4 pt-4 border-t border-[oklch(90%_0.005_260)]/50 relative z-10">
-              <p className="text-[12px] text-[oklch(48%_0.010_260)] italic">
-                Recommendation: Maintain 06:45 AM wake time for the next 4 days to lock in circadian alignment.
-              </p>
-            </div>
-          </div>
-          <SleepScoreCircle />
+          <AiInsightCard category="sleep_hygiene" title="Biometric Insight" icon="auto_awesome" />
+          <SleepScoreCircle score={sleepScore} count={entries.length} />
         </div>
       </div>
     </div>

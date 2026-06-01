@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getRecentLogs, type DayLog, type LogEntry } from '@/lib/api/logs'
 import { JournalInsightCard } from '@/components/health/JournalInsightCard'
@@ -99,6 +100,10 @@ interface DayLogCardProps {
 }
 
 function DayLogCard({ day }: DayLogCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const visibleEntries = expanded ? day.entries : day.entries.slice(0, 5)
+  const hiddenCount = day.entries.length - 5
+
   return (
     <div className="relative pl-0 md:pl-12">
       <div className="hidden md:block absolute left-0 top-6 w-[37px] h-[37px] bg-surface border-2 border-primary rounded-full z-10 flex items-center justify-center">
@@ -133,7 +138,7 @@ function DayLogCard({ day }: DayLogCardProps) {
           </div>
 
           <div className="flex-1 space-y-1">
-            {day.entries.slice(0, 5).map((entry) => {
+            {visibleEntries.map((entry) => {
               const meta = ENTRY_ICONS[entry.type] ?? ENTRY_ICONS.meal
               return (
                 <div key={entry.id} className="p-2 rounded-lg hover:bg-surface-container transition-colors cursor-pointer group/item">
@@ -170,11 +175,14 @@ function DayLogCard({ day }: DayLogCardProps) {
               )
             })}
             {day.entries.length > 5 && (
-              <button className="w-full py-1.5 text-[11px] font-semibold text-primary flex items-center justify-center gap-1 hover:bg-primary/10 rounded transition-colors">
-                <span>Expand {day.entries.length - 5} more entries</span>
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className="w-full py-1.5 text-[11px] font-semibold text-primary flex items-center justify-center gap-1 hover:bg-primary/10 rounded transition-colors"
+              >
+                <span>{expanded ? 'Show less' : `Expand ${hiddenCount} more entr${hiddenCount === 1 ? 'y' : 'ies'}`}</span>
                 <span
-                  className="material-symbols-outlined text-[16px]"
-                  style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
+                  className="material-symbols-outlined text-[16px] transition-transform"
+                  style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20", transform: expanded ? 'rotate(180deg)' : undefined }}
                 >
                   expand_more
                 </span>

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   const data = parsed.data
   const row = {
     name: data.name,
-    brand: data.brand ?? null,
+    serving_size_g: data.serving_size_g ?? null,
     calories_per_100g: data.calories_per_100g,
     protein_g: data.protein_g,
     carb_g: data.carb_g,

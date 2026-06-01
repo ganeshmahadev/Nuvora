@@ -1,10 +1,10 @@
 from contextlib import asynccontextmanager
 import logging
 from fastapi import FastAPI
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from app.config import settings
-from app.api import health, insights, agents
 import structlog
+
+from app.config import settings
+from app.api import health, insights, foods
 
 structlog.configure(
     processors=[
@@ -27,20 +27,17 @@ log = structlog.get_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    log.info("app.starting", environment=settings.ENVIRONMENT)
-    async with AsyncPostgresSaver.from_conn_string(settings.DATABASE_URL) as checkpointer:
-        await checkpointer.setup()
-        app.state.checkpointer = checkpointer
-        yield
-    log.info("app.stopped")
+    log.info("insight_service.starting", environment=settings.ENVIRONMENT)
+    yield
+    log.info("insight_service.stopped")
 
 
 app = FastAPI(
-    title="Nuvora LangGraph Service",
-    version="0.1.0",
+    title="Nuvora Insight Service",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
 app.include_router(health.router)
 app.include_router(insights.router, prefix="/insights", tags=["insights"])
-app.include_router(agents.router, prefix="/agents", tags=["agents"])
+app.include_router(foods.router, prefix="/foods", tags=["foods"])

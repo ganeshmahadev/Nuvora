@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useLogWeight, useMetricHistory, useTodayMetrics } from '@/features/metrics/hooks/useMetricLog'
 import { logWeightSchema, type LogWeightValues } from '@/features/metrics/schemas/metric.schema'
 import type { WeightEntry } from '@/lib/api/metrics'
+import { AiInsightCard } from '@/components/health/AiInsightCard'
 import { MetricHistoryTable } from '@/components/health/MetricHistoryTable'
 import { METRIC_CONFIGS } from '@/lib/config/metrics.config'
 import Link from 'next/link'
@@ -232,26 +233,7 @@ export default function WeightLogContent() {
         </div>
 
         <div className="lg:col-span-4 space-y-5">
-          <div className="bg-surface-container-lowest border border-[oklch(52%_0.150_270)]/20 p-5 rounded-xl relative overflow-hidden shadow-[0_20px_40px_-10px_rgba(28,63,231,0.12)]">
-            <div className="absolute -top-16 -right-16 w-48 h-48 bg-[oklch(52%_0.150_270)]/8 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex items-center gap-2 mb-3 text-[oklch(52%_0.150_270)] relative z-10">
-              <span
-                className="material-symbols-outlined text-[20px]"
-                style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-              >
-                auto_awesome
-              </span>
-              <h4 className="text-[14px] font-bold text-[oklch(52%_0.150_270)]">Biometric Insight</h4>
-            </div>
-            <p className="text-[15px] text-[oklch(14%_0.012_260)] leading-relaxed relative z-10">
-              Your weight trend shows a <span className="text-primary font-bold">steady 0.3kg/week decline</span> over the past 3 weeks, well within the healthy range for sustainable body recomposition.
-            </p>
-            <div className="mt-4 pt-4 border-t border-[oklch(90%_0.005_260)]/50 relative z-10">
-              <p className="text-[12px] text-[oklch(48%_0.010_260)] italic">
-                Consistent tracking reveals that your Wednesday weigh-ins are typically 0.5kg lower than Monday readings, suggesting mid-week metabolic rhythm.
-              </p>
-            </div>
-          </div>
+          <AiInsightCard category="weight_trend" title="Biometric Insight" icon="monitor_weight" fallbackDescription="Log your weight consistently and we'll identify trends, account for normal fluctuations, and provide context around your changes." />
           <div className="bg-[oklch(97%_0.005_90)] border border-[oklch(90%_0.005_260)] rounded-xl p-4">
             <div className="flex items-center gap-2 mb-3">
               <span

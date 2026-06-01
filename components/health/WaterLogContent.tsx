@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useTodayMetrics, useMetricHistory, useLogWater, useDeleteMetric } from '@/features/metrics/hooks/useMetricLog'
+import { useTodayMetrics, useLogWater } from '@/features/metrics/hooks/useMetricLog'
+import { useProfile, useUpdateProfile } from '@/features/profile/hooks/useProfile'
 import { METRIC_CONFIGS } from '@/lib/config/metrics.config'
 import { logWaterSchema, type LogWaterValues } from '@/features/metrics/schemas/metric.schema'
 import { MetricHistoryTable } from '@/components/health/MetricHistoryTable'
-import { AiInsightPlaceholder } from '@/components/health/AiInsightPlaceholder'
+import { AiInsightCard } from '@/components/health/AiInsightCard'
 import Link from 'next/link'
 
 function WaterProgressViz({ currentMl, targetMl }: { currentMl: number; targetMl: number }) {
@@ -161,13 +162,55 @@ function WaterForm({ date }: { date: string }) {
   )
 }
 
+function useWeather(city: string | null) {
+  const [temp, setTemp] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!city) { setTemp(null); return }
+    setLoading(true)
+    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`)
+      .then((r) => r.json())
+      .then((geo) => {
+        const result = geo.results?.[0]
+        if (!result) return
+        return fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${result.latitude}&longitude=${result.longitude}&current=temperature_2m`,
+        )
+          .then((r) => r.json())
+          .then((wx) => setTemp(wx.current?.temperature_2m ?? null))
+      })
+      .catch(() => setTemp(null))
+      .finally(() => setLoading(false))
+  }, [city])
+
+  return { temp, loading }
+}
+
 function WaterInsightSidebar() {
+  const { data: profile } = useProfile()
+  const updateProfile = useUpdateProfile()
+  const [editingCity, setEditingCity] = useState(false)
+  const [cityInput, setCityInput] = useState('')
+  const { temp, loading: weatherLoading } = useWeather(profile?.location_city ?? null)
+
+  function saveCity() {
+    const city = cityInput.trim() || null
+    updateProfile.mutate(
+      { location_city: city },
+      {
+        onSuccess: () => setEditingCity(false),
+        onError: () => alert('Failed to save city. Please try again.'),
+      },
+    )
+  }
+
+  const tempLabel = weatherLoading ? '…' : temp != null ? `${Math.round(temp)}°C` : '—'
+  const intakeAdjust = temp != null ? (temp >= 30 ? '+400 ml' : temp >= 25 ? '+200 ml' : 'No adjustment') : '—'
+
   return (
     <div className="space-y-5">
-      <AiInsightPlaceholder
-        title="Hydration Insights"
-        description="Your consistent morning hydration aligns with peak cortisol rhythms. Maintaining intake before 10 AM correlates with 18% improved metabolic markers in your data."
-      />
+      <AiInsightCard category="water_hydration" title="Hydration Insights" icon="water_drop" fallbackDescription="Track your daily hydration and we'll analyze your intake patterns, timing, and consistency to provide personalized recommendations." />
       <div className="bg-[oklch(97%_0.005_90)] border border-[oklch(90%_0.005_260)] rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <span
@@ -178,34 +221,50 @@ function WaterInsightSidebar() {
           </span>
           <span className="text-[12px] font-bold uppercase tracking-[0.06em] text-primary">Environment</span>
         </div>
+
+        <div className="mb-3">
+          {editingCity ? (
+            <div className="flex gap-2">
+              <input
+                autoFocus
+                value={cityInput}
+                onChange={(e) => setCityInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveCity(); if (e.key === 'Escape') setEditingCity(false) }}
+                placeholder="e.g. Chennai"
+                className="flex-1 text-[13px] bg-surface border border-[oklch(90%_0.005_260)] rounded-md px-2 py-1 focus:outline-none focus:border-primary"
+              />
+              <button onClick={saveCity} className="text-[12px] font-medium text-primary px-2">Save</button>
+              <button onClick={() => setEditingCity(false)} className="text-[12px] text-fg-subtle px-1">✕</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { setCityInput(profile?.location_city ?? ''); setEditingCity(true) }}
+              className="flex items-center gap-1.5 text-[13px] text-fg-muted hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}>
+                location_on
+              </span>
+              {profile?.location_city ?? 'Set your city'}
+              <span className="material-symbols-outlined text-[13px] opacity-50" style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}>
+                edit
+              </span>
+            </button>
+          )}
+        </div>
+
         <div className="space-y-2">
           <div className="flex justify-between text-[13px]">
             <span className="text-[oklch(48%_0.010_260)]">Ambient temperature</span>
-            <span className="text-[oklch(14%_0.012_260)] font-medium">22°C</span>
-          </div>
-          <div className="flex justify-between text-[13px]">
-            <span className="text-[oklch(48%_0.010_260)]">Humidity</span>
-            <span className="text-[oklch(14%_0.012_260)] font-medium">45%</span>
+            <span className="text-[oklch(14%_0.012_260)] font-medium">{tempLabel}</span>
           </div>
           <div className="flex justify-between text-[13px]">
             <span className="text-[oklch(48%_0.010_260)]">Suggested intake adjustment</span>
-            <span className="text-primary font-medium">+200 ml</span>
+            <span className="text-primary font-medium">{intakeAdjust}</span>
           </div>
         </div>
-      </div>
-      <div className="bg-[oklch(97%_0.005_90)] border border-[oklch(90%_0.005_260)] rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <span
-            className="material-symbols-outlined text-[18px] text-primary"
-            style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >
-            directions_run
-          </span>
-          <span className="text-[12px] font-bold uppercase tracking-[0.06em] text-primary">Activity impact</span>
-        </div>
-        <p className="text-[13px] text-[oklch(48%_0.010_260)]">
-          No recorded activity today. On active days, add 500ml per 30 minutes of exercise beyond your base target.
-        </p>
+        {profile?.location_city && (
+          <p className="text-[11px] text-fg-subtle mt-2">Used by AI insights for personalised hydration advice.</p>
+        )}
       </div>
     </div>
   )
@@ -215,9 +274,28 @@ export default function WaterLogContent() {
   const today = new Date().toISOString().split('T')[0]
   const [date] = useState(today)
   const config = METRIC_CONFIGS.water
+  const [editingGoal, setEditingGoal] = useState(false)
+  const [goalInput, setGoalInput] = useState('')
 
   const { data: todayMetrics } = useTodayMetrics()
+  const { data: profile } = useProfile()
+  const updateProfile = useUpdateProfile()
+
   const currentMl = todayMetrics?.total_water_ml ?? 0
+  const targetMl = profile?.water_target_ml ?? config.defaultTarget ?? 2500
+
+  function saveGoal() {
+    const val = parseInt(goalInput, 10)
+    if (!isNaN(val) && val >= 500 && val <= 10000) {
+      updateProfile.mutate(
+        { water_target_ml: val },
+        {
+          onSuccess: () => setEditingGoal(false),
+          onError: () => alert('Failed to save goal. Please try again.'),
+        },
+      )
+    }
+  }
 
   return (
     <div className="px-4 md:px-6 lg:px-8 py-6 max-w-[1280px] mx-auto">
@@ -246,12 +324,39 @@ export default function WaterLogContent() {
             Log Water
           </h1>
         </div>
-        <p className="text-[15px] text-[oklch(48%_0.010_260)]">Track your daily hydration. Tap a quick-add or enter a custom amount.</p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-[15px] text-[oklch(48%_0.010_260)]">Daily goal:</p>
+          {editingGoal ? (
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                type="number"
+                value={goalInput}
+                onChange={(e) => setGoalInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveGoal(); if (e.key === 'Escape') setEditingGoal(false) }}
+                className="w-24 text-[14px] font-medium bg-surface border border-primary rounded-md px-2 py-0.5 focus:outline-none tabular-nums"
+              />
+              <span className="text-[14px] text-fg-muted">ml</span>
+              <button onClick={saveGoal} className="text-[12px] font-medium text-primary">Save</button>
+              <button onClick={() => setEditingGoal(false)} className="text-[12px] text-fg-subtle">✕</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { setGoalInput(String(targetMl)); setEditingGoal(true) }}
+              className="flex items-center gap-1 text-[15px] font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              {targetMl} ml
+              <span className="material-symbols-outlined text-[14px] opacity-60" style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}>
+                edit
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="hidden lg:block lg:col-span-4">
-          <WaterProgressViz currentMl={currentMl} targetMl={config.defaultTarget ?? 2500} />
+          <WaterProgressViz currentMl={currentMl} targetMl={targetMl} />
         </div>
 
         <div className="lg:col-span-5 space-y-6">
@@ -260,7 +365,7 @@ export default function WaterLogContent() {
           </div>
 
           <div className="lg:hidden">
-            <WaterProgressViz currentMl={currentMl} targetMl={config.defaultTarget ?? 2500} />
+            <WaterProgressViz currentMl={currentMl} targetMl={targetMl} />
           </div>
 
           <div className="bg-surface-container-lowest border border-[oklch(95%_0.005_90)] rounded-xl p-5">

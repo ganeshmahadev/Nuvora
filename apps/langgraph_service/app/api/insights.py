@@ -1,61 +1,89 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from fastapi.responses import StreamingResponse
-from typing import AsyncGenerator
-import json
 import structlog
 
-from app.auth import verify_service_token, get_user_id
-from app.dependencies import get_checkpointer
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from app.auth import verify_service_token
+from app.config import settings
+from app.schemas.insight import InsightGenerateRequest, INSIGHT_CATEGORIES
+from app.services.insight_service import (
+    generate_insight,
+    get_latest_insight,
+    get_current_log_count,
+)
 
 log = structlog.get_logger()
 router = APIRouter()
 
 
-@router.post("/trigger")
-async def trigger_insight(
+@router.post("/generate")
+async def generate(
+    body: InsightGenerateRequest,
+    _token: str = Depends(verify_service_token),
+    x_user_id: str = Header(..., alias="X-User-Id"),
+):
+    log.info("insights.generate", category=body.category, user_id=x_user_id)
+
+    if body.category not in INSIGHT_CATEGORIES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid category. Must be one of: {INSIGHT_CATEGORIES}",
+        )
+
+    try:
+        result = await generate_insight(
+            user_id=x_user_id,
+            category=body.category,
+            reference_date=body.reference_date,
+            force_regenerate=body.force_regenerate,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail=str(e))
+    except Exception as e:
+        log.error("insights.generate_failed", category=body.category, user_id=x_user_id, error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Insight generation failed: {str(e)}",
+        )
+
+    return result
+
+
+@router.get("/latest")
+async def latest(
     category: str,
     _token: str = Depends(verify_service_token),
     x_user_id: str = Header(..., alias="X-User-Id"),
-    checkpointer: AsyncPostgresSaver = Depends(get_checkpointer),
 ):
-    log.info("insight.trigger", category=category, user_id=x_user_id)
-    return {"status": "triggered", "category": category, "insight_id": "stub"}
+    log.info("insights.latest", category=category, user_id=x_user_id)
 
+    if category not in INSIGHT_CATEGORIES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid category. Must be one of: {INSIGHT_CATEGORIES}",
+        )
 
-@router.get("/stream/{insight_id}")
-async def stream_insight(
-    insight_id: str,
-    _token: str = Depends(verify_service_token),
-    x_user_id: str = Header(..., alias="X-User-Id"),
-    checkpointer: AsyncPostgresSaver = Depends(get_checkpointer),
-):
-    log.info("insight.stream", insight_id=insight_id, user_id=x_user_id)
+    existing = get_latest_insight(x_user_id, category)
 
-    async def event_stream() -> AsyncGenerator[str, None]:
-        yield format_sse({"type": "pending", "insight_id": insight_id, "message": "Graph execution not yet implemented"})
-        yield format_sse({"type": "complete", "insight_id": insight_id})
+    if existing and existing.get("generation_status") == "complete":
+        current_count = get_current_log_count(x_user_id, category)
+        stored_count = existing.get("log_count_at_generation", 0) or 0
+        if current_count <= stored_count:
+            return {**existing, "status": "complete", "from_cache": True}
 
-    return StreamingResponse(
-        event_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache, no-transform",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive",
-        },
-    )
-
-
-@router.get("/{insight_id}")
-async def get_insight(
-    insight_id: str,
-    _token: str = Depends(verify_service_token),
-    x_user_id: str = Header(..., alias="X-User-Id"),
-):
-    log.info("insight.get", insight_id=insight_id, user_id=x_user_id)
-    return {"status": "stub", "insight_id": insight_id}
-
-
-def format_sse(data: dict) -> str:
-    return f"data: {json.dumps(data)}\n\n"
+    try:
+        result = await generate_insight(user_id=x_user_id, category=category)
+        return result
+    except FileNotFoundError:
+        if existing:
+            return {**existing, "status": "complete", "from_cache": True, "stale": True}
+        return {
+            "status": "insufficient_data",
+            "category": category,
+            "hint": "Keep tracking to unlock personalized insights.",
+            "log_count": get_current_log_count(x_user_id, category),
+            "min_required": settings.MIN_LOGS_FOR_INSIGHT,
+        }
+    except Exception as e:
+        log.error("insights.latest_failed", category=category, user_id=x_user_id, error=str(e))
+        if existing:
+            return {**existing, "status": "complete", "from_cache": True, "stale": True}
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

@@ -1,4 +1,4 @@
-.PHONY: install dev test docker-up docker-down lint format
+.PHONY: install dev test lint format healthcheck
 
 install:
 	pip install -r requirements.txt
@@ -8,18 +8,6 @@ dev:
 
 test:
 	pytest tests/ -v
-
-docker-up:
-	docker compose up -d
-
-docker-down:
-	docker compose down
-
-docker-build:
-	docker compose build
-
-docker-logs:
-	docker compose logs -f langgraph-service
 
 lint:
 	ruff check app/ tests/
