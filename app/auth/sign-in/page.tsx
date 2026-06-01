@@ -58,7 +58,7 @@ export default function SignInPage() {
             Know your health <em>at a glance.</em>
           </h1>
           <p className="mt-4 text-[16px] leading-[24px] text-muted-foreground">
-            Quiet Intelligence. Scandinavian precision tracking powered by multi-agent AI.
+            Quiet Intelligence Precision tracking powered by multi-agent AI.
           </p>
 
           <div className="mt-10 flex flex-col gap-2 text-[13px] text-muted-foreground">

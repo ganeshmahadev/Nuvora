@@ -23,20 +23,20 @@ function isLogSectionActive(pathname: string): boolean {
 function LeafLink({
   item,
   pathname,
-  collapsed,
+  expanded,
 }: {
   item: NavItem
   pathname: string
-  collapsed: boolean
+  expanded: boolean
 }) {
   const active = isActive(pathname, item.href!)
   return (
     <Link
       href={item.href!}
-      title={collapsed ? item.label : undefined}
+      title={expanded ? undefined : item.label}
       className={cn(
-        'flex items-center gap-3 px-3 py-2 rounded-lg text-[14px] font-medium transition-colors',
-        collapsed && 'justify-center',
+        'flex items-center gap-3 rounded-lg text-[14px] font-medium transition-colors',
+        expanded ? 'px-3 py-2' : 'justify-center px-0 py-2',
         active ? 'bg-surface-low text-primary' : 'text-fg-muted hover:bg-surface-low hover:text-fg',
       )}
     >
@@ -50,7 +50,14 @@ function LeafLink({
       >
         {item.icon}
       </span>
-      {!collapsed && item.label}
+      <span
+        className={cn(
+          'whitespace-nowrap transition-opacity duration-150',
+          expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden',
+        )}
+      >
+        {item.label}
+      </span>
     </Link>
   )
 }
@@ -58,11 +65,11 @@ function LeafLink({
 function LogAccordion({
   item,
   pathname,
-  collapsed,
+  expanded,
 }: {
   item: NavItem
   pathname: string
-  collapsed: boolean
+  expanded: boolean
 }) {
   const sectionActive = isLogSectionActive(pathname)
   const [open, setOpen] = useState(sectionActive)
@@ -71,13 +78,13 @@ function LogAccordion({
     if (sectionActive) setOpen(true)
   }, [sectionActive])
 
-  if (collapsed) {
+  if (!expanded) {
     return (
       <Link
         href="/dashboard/log"
         title="Log"
         className={cn(
-          'flex items-center justify-center px-3 py-2 rounded-lg transition-colors',
+          'flex items-center justify-center py-2 rounded-lg transition-colors',
           sectionActive
             ? 'bg-surface-low text-primary'
             : 'text-fg-muted hover:bg-surface-low hover:text-fg',
@@ -131,7 +138,7 @@ function LogAccordion({
       {open && (
         <div className="mt-0.5 ml-3 pl-3 border-l border-border space-y-0.5">
           {item.children!.map((child) => (
-            <LeafLink key={child.href} item={child} pathname={pathname} collapsed={false} />
+            <LeafLink key={child.href} item={child} pathname={pathname} expanded={true} />
           ))}
         </div>
       )}
@@ -142,19 +149,7 @@ function LogAccordion({
 export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const [collapsed, setCollapsed] = useState(false)
-
-  useEffect(() => {
-    const stored = localStorage.getItem('sidebar-collapsed')
-    if (stored === 'true') setCollapsed(true)
-  }, [])
-
-  function toggleCollapsed() {
-    setCollapsed((v) => {
-      localStorage.setItem('sidebar-collapsed', String(!v))
-      return !v
-    })
-  }
+  const [expanded, setExpanded] = useState(false)
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -164,103 +159,85 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   const initial = user.name.charAt(0).toUpperCase()
 
-  const sidebarContent = (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div
-        className={cn(
-          'flex items-center gap-2.5 px-4 py-5 border-b border-border',
-          collapsed && 'justify-center px-2',
-        )}
-      >
-        <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
-          <span className="text-on-primary text-[13px] font-bold tracking-tight">N</span>
-        </div>
-        {!collapsed && (
-          <span className="text-[15px] font-semibold tracking-[-0.02em] text-fg">Nuvora</span>
-        )}
-      </div>
-
-      {/* Nav items */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-        {NAV_ITEMS.map((item) =>
-          item.children ? (
-            <LogAccordion key={item.label} item={item} pathname={pathname} collapsed={collapsed} />
-          ) : (
-            <LeafLink key={item.href} item={item} pathname={pathname} collapsed={collapsed} />
-          ),
-        )}
-      </nav>
-
-      {/* Bottom: settings, collapse toggle, user */}
-      <div className="px-2 pb-3 border-t border-border pt-3 space-y-0.5">
-        <LeafLink item={SETTINGS_NAV_ITEM} pathname={pathname} collapsed={collapsed} />
-
-        <button
-          onClick={toggleCollapsed}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={cn(
-            'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-fg-subtle hover:bg-surface-low hover:text-fg transition-colors text-[14px] font-medium',
-            collapsed && 'justify-center',
-          )}
-        >
-          <span
-            className="material-symbols-outlined text-[20px] leading-none flex-shrink-0 transition-transform duration-200"
-            style={{
-              fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20",
-              transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
-            }}
-          >
-            left_panel_close
-          </span>
-          {!collapsed && 'Collapse'}
-        </button>
-
-        <button
-          onClick={handleSignOut}
-          className={cn(
-            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-surface-low transition-colors',
-            collapsed && 'justify-center',
-          )}
-          title={collapsed ? `${user.name} — Sign out` : undefined}
-        >
-          <div className="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 text-[13px] font-semibold text-fg">
-            {initial}
-          </div>
-          {!collapsed && (
-            <>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-[13px] font-medium text-fg truncate">{user.name}</p>
-                <p className="text-[11px] text-fg-subtle truncate">{user.email}</p>
-              </div>
-              <span
-                className="material-symbols-outlined text-[18px] text-fg-subtle"
-                style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
-              >
-                logout
-              </span>
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-  )
-
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — hover to expand */}
       <aside
         suppressHydrationWarning
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
         className={cn(
-          'hidden md:flex flex-col flex-shrink-0 bg-surface border-r border-border h-full transition-[width] duration-200',
-          collapsed ? 'w-16' : 'w-60',
+          'hidden md:flex flex-col flex-shrink-0 bg-transparent h-full overflow-hidden',
+          'transition-[width] duration-200 ease-out',
+          expanded ? 'w-60' : 'w-16',
         )}
       >
-        {sidebarContent}
+        {/* Logo */}
+        <div
+          className={cn(
+            'flex items-center gap-2.5 flex-shrink-0',
+            expanded ? 'px-4 py-5' : 'justify-center px-0 py-5',
+          )}
+        >
+          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
+            <span className="text-on-primary text-[13px] font-bold tracking-tight">N</span>
+          </div>
+          <span
+            className={cn(
+              'text-[15px] font-semibold tracking-[-0.02em] text-fg whitespace-nowrap transition-opacity duration-150',
+              expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden',
+            )}
+          >
+            Nuvora
+          </span>
+        </div>
+
+        {/* Nav — vertically centered */}
+        <nav className="flex-1 flex flex-col justify-center overflow-y-auto px-2 py-3 space-y-0.5">
+          {NAV_ITEMS.map((item) =>
+            item.children ? (
+              <LogAccordion key={item.label} item={item} pathname={pathname} expanded={expanded} />
+            ) : (
+              <LeafLink key={item.href} item={item} pathname={pathname} expanded={expanded} />
+            ),
+          )}
+        </nav>
+
+        {/* Bottom: settings + sign out */}
+        <div className="px-2 pb-3 pt-3 space-y-0.5">
+          <LeafLink item={SETTINGS_NAV_ITEM} pathname={pathname} expanded={expanded} />
+
+          <button
+            onClick={handleSignOut}
+            title={expanded ? undefined : `${user.name} — Sign out`}
+            className={cn(
+              'w-full rounded-lg hover:bg-surface-low transition-colors',
+              expanded ? 'flex items-center gap-3 px-3 py-2.5' : 'flex justify-center px-0 py-2.5',
+            )}
+          >
+            <div className="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0 text-[13px] font-semibold text-fg">
+              {initial}
+            </div>
+            {expanded && (
+              <>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[13px] font-medium text-fg truncate">{user.name}</p>
+                  <p className="text-[11px] text-fg-subtle truncate">{user.email}</p>
+                </div>
+                <span
+                  className="material-symbols-outlined text-[18px] text-fg-subtle"
+                  style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
+                >
+                  logout
+                </span>
+              </>
+            )}
+          </button>
+        </div>
       </aside>
 
       {/* Mobile bottom tabs — 4 items */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex bg-surface border-t border-border h-16 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex bg-transparent border-t border-border/50 h-16 safe-area-bottom">
         {MOBILE_TABS.map((tab) => {
           const active = tab.href ? isActive(pathname, tab.href) : false
           return (
