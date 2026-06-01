@@ -250,6 +250,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside
+        suppressHydrationWarning
         className={cn(
           'hidden md:flex flex-col flex-shrink-0 bg-surface border-r border-border h-full transition-[width] duration-200',
           collapsed ? 'w-16' : 'w-60',
