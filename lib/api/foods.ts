@@ -16,6 +16,7 @@ export interface FoodItem {
   calcium_mg: number | null
   potassium_mg: number | null
   sugar_g: number | null
+  brand: string | null
   created_by: string | null
   is_verified: boolean
 }
@@ -24,7 +25,7 @@ export const FOOD_SELECT_FIELDS = [
   'id', 'name', 'serving_size_g', 'calories_per_100g', 'protein_g', 'carb_g', 'fat_g',
   'fiber_g', 'sodium_mg', 'vitamin_a_iu', 'vitamin_c_mg', 'iron_mg',
   'zinc_mg', 'magnesium_mg', 'calcium_mg', 'potassium_mg', 'sugar_g',
-  'created_by', 'is_verified',
+  'brand', 'created_by', 'is_verified',
 ].join(',')
 
 export interface FoodTotals {
