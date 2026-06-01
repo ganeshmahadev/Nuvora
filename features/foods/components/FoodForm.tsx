@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createFoodSchema, type CreateFoodValues } from '@/features/foods/schemas/food.schema'
 import { useCreateFood } from '@/features/foods/hooks/useCreateFood'
+import { predictMacros } from '@/lib/api/foods'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,11 +18,15 @@ interface FoodFormProps {
 
 export function FoodForm({ onSuccess, onCancel }: FoodFormProps) {
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [predicting, setPredicting] = useState(false)
+  const [predictError, setPredictError] = useState<string | null>(null)
   const createFood = useCreateFood()
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CreateFoodValues>({
     resolver: zodResolver(createFoodSchema),
@@ -41,6 +46,28 @@ export function FoodForm({ onSuccess, onCancel }: FoodFormProps) {
       sugar_g: null,
     },
   })
+
+  const foodName = watch('name')
+  const brandName = watch('brand')
+
+  async function handlePredict() {
+    if (!foodName?.trim()) return
+    setPredicting(true)
+    setPredictError(null)
+    try {
+      const macros = await predictMacros(foodName, brandName)
+      setValue('calories_per_100g', macros.calories_per_100g, { shouldValidate: true })
+      setValue('protein_g', macros.protein_g, { shouldValidate: true })
+      setValue('carb_g', macros.carb_g, { shouldValidate: true })
+      setValue('fat_g', macros.fat_g, { shouldValidate: true })
+      if (macros.fiber_g != null) setValue('fiber_g', macros.fiber_g, { shouldValidate: true })
+      if (macros.sodium_mg != null) setValue('sodium_mg', macros.sodium_mg, { shouldValidate: true })
+    } catch (err: any) {
+      setPredictError(err.message ?? 'Prediction failed')
+    } finally {
+      setPredicting(false)
+    }
+  }
 
   function onSubmit(data: CreateFoodValues) {
     createFood.mutate(data, {
@@ -77,9 +104,29 @@ export function FoodForm({ onSuccess, onCancel }: FoodFormProps) {
         />
       </div>
 
-      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-subtle pt-2">
-        Macros per 100g *
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-subtle">
+          Macros per 100g *
+        </p>
+        <button
+          type="button"
+          onClick={handlePredict}
+          disabled={predicting || !foodName?.trim()}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-ai/10 text-ai hover:bg-ai/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span
+            className="material-symbols-outlined text-[14px]"
+            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
+          >
+            auto_awesome
+          </span>
+          {predicting ? 'Predicting…' : 'AI predict'}
+        </button>
+      </div>
+
+      {predictError && (
+        <p className="text-[12px] text-error">{predictError}</p>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>

@@ -79,5 +79,18 @@ export const ACTIVITY_TYPES = [
 
 export type ActivityType = (typeof ACTIVITY_TYPES)[number]
 
+export const ACTIVITY_TYPE_ICONS: Record<ActivityType, string> = {
+  Running: 'directions_run',
+  Walking: 'directions_walk',
+  Cycling: 'directions_bike',
+  'Strength Training': 'fitness_center',
+  Yoga: 'self_improvement',
+  Swimming: 'pool',
+  HIIT: 'bolt',
+  Dancing: 'music_note',
+  Hiking: 'hiking',
+  Other: 'more_horiz',
+}
+
 export const INTENSITY_LABELS = ['low', 'moderate', 'high'] as const
 export type IntensityLabel = (typeof INTENSITY_LABELS)[number]

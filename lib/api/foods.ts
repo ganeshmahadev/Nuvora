@@ -164,4 +164,26 @@ export type CreateFoodInput = {
   sugar_g?: number | null
 }
 
+export interface PredictedMacros {
+  calories_per_100g: number
+  protein_g: number
+  carb_g: number
+  fat_g: number
+  fiber_g: number | null
+  sodium_mg: number | null
+}
+
+export async function predictMacros(name: string, brand?: string | null): Promise<PredictedMacros> {
+  const res = await fetch('/api/foods/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, brand: brand ?? undefined }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Prediction failed' }))
+    throw new Error(err.error ?? 'Prediction failed')
+  }
+  return res.json()
+}
+
 export type UpdateFoodInput = Partial<CreateFoodInput>

@@ -3,11 +3,9 @@
 import { useState } from 'react'
 import { FoodPickerDialog } from '@/components/health/FoodPickerDialog'
 import { NutritionSummaryBar } from '@/components/health/NutritionSummaryBar'
-import { MealItemRow } from '@/components/health/MealItemRow'
 import {
   useCreateMealLog,
   useAddMealItem,
-  useDeleteMealItem,
 } from '@/features/meals/hooks/useMealLog'
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ICONS, type MealType } from '@/lib/api/meals'
 import { computeTotals, type FoodItem } from '@/lib/api/foods'
@@ -31,22 +29,12 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
   const [mealType, setMealType] = useState<MealType>('breakfast')
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([])
-  const [savedMealLogId, setSavedMealLogId] = useState<string | null>(null)
-  const [isSaved, setIsSaved] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const createMealMutation = useCreateMealLog()
   const addItemMutation = useAddMealItem()
-  const removeItemMutation = useDeleteMealItem()
 
   function handleFoodSelected(food: FoodItem, quantityG: number) {
-    if (isSaved && savedMealLogId) {
-      addItemMutation.mutate({
-        mealLogId: savedMealLogId,
-        data: { food_id: food.id, quantity_g: quantityG },
-      })
-      return
-    }
-
     const totals = computeTotals(food, quantityG)
     setPendingItems((prev) => [
       ...prev,
@@ -58,33 +46,29 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
     setPendingItems((prev) => prev.filter((i) => i.id !== itemId))
   }
 
-  function handleRemoveSaved(itemId: string) {
-    if (!savedMealLogId) return
-    removeItemMutation.mutate({ mealLogId: savedMealLogId, itemId })
-  }
-
   async function handleSave() {
-    let mealLogId = savedMealLogId
-
-    if (!mealLogId) {
+    if (pendingItems.length === 0) return
+    setSaving(true)
+    try {
       const meal = await createMealMutation.mutateAsync({
         date,
         meal_type: mealType,
       })
-      mealLogId = (meal as any).id
-      setSavedMealLogId(mealLogId)
-    }
+      const mealLogId = (meal as any).id
 
-    for (const item of pendingItems) {
-      await addItemMutation.mutateAsync({
-        mealLogId: mealLogId!,
-        data: { food_id: item.food.id, quantity_g: item.quantityG },
-      })
-    }
+      for (const item of pendingItems) {
+        await addItemMutation.mutateAsync({
+          mealLogId,
+          data: { food_id: item.food.id, quantity_g: item.quantityG },
+        })
+      }
 
-    setPendingItems([])
-    setIsSaved(true)
-    onSaved?.()
+      setPendingItems([])
+      setMealType('breakfast')
+      onSaved?.()
+    } finally {
+      setSaving(false)
+    }
   }
 
   const pendingTotals = {
@@ -101,48 +85,6 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
     magnesium_mg: null as number | null,
     calcium_mg: null as number | null,
     potassium_mg: null as number | null,
-  }
-
-  if (isSaved) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <span
-            className="material-symbols-outlined text-[20px] text-primary"
-            style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-          >
-            check_circle
-          </span>
-          <p className="text-[15px] font-medium text-fg">
-            {MEAL_TYPE_LABELS[mealType]} saved
-          </p>
-        </div>
-
-        <p className="text-[13px] text-fg-muted">
-          Your {MEAL_TYPE_LABELS[mealType].toLowerCase()} has been logged. You can continue adding more items or navigate away.
-        </p>
-
-        <Button
-          variant="outline"
-          onClick={() => setPickerOpen(true)}
-          className="w-full"
-        >
-          <span
-            className="material-symbols-outlined text-[18px] mr-1"
-            style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
-          >
-            add
-          </span>
-          Add more food
-        </Button>
-
-        <FoodPickerDialog
-          open={pickerOpen}
-          onOpenChange={setPickerOpen}
-          onSelect={(food, qty) => handleFoodSelected(food, qty)}
-        />
-      </div>
-    )
   }
 
   return (
@@ -232,10 +174,10 @@ export function MealComposer({ date, calorieTarget, onSaved }: MealComposerProps
       {pendingItems.length > 0 && (
         <Button
           onClick={handleSave}
-          disabled={createMealMutation.isPending}
+          disabled={saving}
           className="w-full bg-primary hover:bg-primary-container text-on-primary"
         >
-          {createMealMutation.isPending ? 'Saving…' : 'Save meal'}
+          {saving ? 'Saving…' : `Save ${MEAL_TYPE_LABELS[mealType].toLowerCase()}`}
         </Button>
       )}
 

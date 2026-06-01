@@ -1,118 +1,54 @@
 'use client'
 
-import Link from 'next/link'
-import { cn } from '@/lib/utils'
-import { METRIC_CONFIGS, type MetricType } from '@/lib/config/metrics.config'
-import { useTodayMetrics } from '@/features/metrics/hooks/useMetricLog'
+import { useState } from 'react'
+import { JournalTimeline } from '@/components/health/JournalTimeline'
 
-const LOG_CARDS: Array<{
-  type: MetricType
-  label: string
-  href: string
-  icon: string
-  color: string
-  getValue: (metrics: ReturnType<typeof useTodayMetrics>['data']) => string | null
-}> = [
-  {
-    type: 'water',
-    label: 'Water',
-    href: '/dashboard/log/water',
-    icon: 'water_drop',
-    color: 'bg-ai/10 text-ai',
-    getValue: (data) => data?.total_water_ml != null ? `${data.total_water_ml} / 2500 ml` : null,
-  },
-  {
-    type: 'sleep',
-    label: 'Sleep',
-    href: '/dashboard/log/sleep',
-    icon: 'bedtime',
-    color: 'bg-ai/10 text-ai',
-    getValue: (data) => {
-      if (data?.sleep_duration_minutes == null) return null
-      const hrs = Math.floor(data.sleep_duration_minutes / 60)
-      const mins = data.sleep_duration_minutes % 60
-      return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`
-    },
-  },
-  {
-    type: 'activity',
-    label: 'Activity',
-    href: '/dashboard/log/activity',
-    icon: 'directions_run',
-    color: 'bg-primary/10 text-primary',
-    getValue: (data) => data?.active_minutes != null ? `${data.active_minutes} min` : null,
-  },
-  {
-    type: 'weight',
-    label: 'Weight',
-    href: '/dashboard/log/weight',
-    icon: 'monitor_weight',
-    color: 'bg-warning-soft text-warning',
-    getValue: (data) => data?.weight_kg != null ? `${data.weight_kg} kg` : null,
-  },
+const CATEGORIES = [
+  { key: '', label: 'All', icon: 'check' },
+  { key: 'meal', label: 'Meals', icon: 'restaurant' },
+  { key: 'water', label: 'Water', icon: 'water_drop' },
+  { key: 'sleep', label: 'Sleep', icon: 'bedtime' },
+  { key: 'activity', label: 'Activity', icon: 'directions_run' },
+  { key: 'weight', label: 'Weight', icon: 'monitor_weight' },
 ]
 
 export default function LogHubPage() {
-  const { data: metrics } = useTodayMetrics()
+  const [activeCategory, setActiveCategory] = useState('')
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 py-6 max-w-2xl mx-auto">
-      <h1 className="text-[24px] font-semibold tracking-[-0.02em] text-fg mb-1">Log</h1>
-      <p className="text-[15px] text-fg-muted mb-6">What did you track today?</p>
+    <div className="px-4 md:px-6 lg:px-8 py-6 max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-[32px] font-semibold tracking-[-0.02em] text-[oklch(14%_0.012_260)]">
+          Journal Archives
+        </h1>
+        <p className="text-[18px] text-[oklch(48%_0.010_260)] mt-1 max-w-2xl">
+          A rhythmic record of your biological narrative.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Link
-          href="/dashboard/log/meals"
-          className={cn(
-            'flex items-center gap-3 p-4 rounded-xl border border-border bg-surface',
-            'hover:bg-surface-low hover:border-primary/20 transition-all group',
-          )}
-        >
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
-            <span
-              className="material-symbols-outlined text-[22px]"
-              style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-            >
-              restaurant
-            </span>
-          </div>
-          <div>
-            <p className="text-[15px] font-medium text-fg group-hover:text-primary transition-colors">
-              Meal
-            </p>
-          </div>
-        </Link>
-
-        {LOG_CARDS.map((card) => (
-          <Link
-            key={card.href}
-            href={card.href}
-            className={cn(
-              'flex items-center gap-3 p-4 rounded-xl border border-border bg-surface',
-              'hover:bg-surface-low hover:border-primary/20 transition-all group',
-            )}
+      <div className="flex gap-3 overflow-x-auto pb-3 mb-8 no-scrollbar">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.key}
+            onClick={() => setActiveCategory(cat.key)}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[14px] font-medium whitespace-nowrap transition-all ${
+              activeCategory === cat.key
+                ? 'bg-[oklch(14%_0.012_260)] text-white'
+                : 'border border-[oklch(90%_0.005_260)] text-[oklch(48%_0.010_260)] hover:bg-surface-container transition-colors'
+            }`}
           >
-            <div className={cn('w-10 h-10 rounded-lg flex items-center justify-center', card.color)}>
-              <span
-                className="material-symbols-outlined text-[22px]"
-                style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
-              >
-                {card.icon}
-              </span>
-            </div>
-            <div>
-              <p className="text-[15px] font-medium text-fg group-hover:text-primary transition-colors">
-                {card.label}
-              </p>
-              {card.getValue(metrics) && (
-                <p className="text-[12px] text-fg-subtle tabular-nums">
-                  {card.getValue(metrics)}
-                </p>
-              )}
-            </div>
-          </Link>
+            <span
+              className="material-symbols-outlined text-[18px]"
+              style={{ fontVariationSettings: activeCategory === cat.key ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20" : "'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20" }}
+            >
+              {cat.icon}
+            </span>
+            {cat.label}
+          </button>
         ))}
       </div>
+
+      <JournalTimeline filter={activeCategory || undefined} />
     </div>
   )
 }

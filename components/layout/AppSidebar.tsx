@@ -8,10 +8,10 @@ import { NAV_GROUPS, SETTINGS_NAV_ITEM, type NavItem } from '@/lib/config/nav.co
 
 const MOBILE_TABS: NavItem[] = [
   { label: 'Home', href: '/app', icon: 'home' },
+  { label: 'Meals', href: '/dashboard/log/meals', icon: 'restaurant' },
   { label: 'Log', href: '/dashboard/log', icon: 'edit_note' },
-  { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
-  { label: 'Insights', href: '/dashboard/insights', icon: 'auto_awesome' },
-  { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
+  { label: 'Sleep', href: '/dashboard/log/sleep', icon: 'bedtime' },
+  { label: 'Activity', href: '/dashboard/log/activity', icon: 'directions_run' },
 ]
 
 interface AppSidebarProps {
@@ -65,15 +65,13 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      {/* Brand */}
       <div className="flex items-center gap-2.5 px-4 py-5 border-b border-border">
         <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
           <span className="text-on-primary text-[13px] font-bold tracking-tight">N</span>
         </div>
-        <span className="text-[15px] font-semibold tracking-[-0.02em] text-fg">Nuvora Health</span>
+        <span className="text-[15px] font-semibold tracking-[-0.02em] text-fg">Nuvora</span>
       </div>
 
-      {/* Nav groups */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
@@ -89,7 +87,6 @@ export function AppSidebar({ user }: AppSidebarProps) {
         ))}
       </nav>
 
-      {/* Bottom: settings + user */}
       <div className="px-2 pb-3 border-t border-border pt-3 space-y-1">
         <NavLink item={SETTINGS_NAV_ITEM} pathname={pathname} />
 
@@ -117,12 +114,10 @@ export function AppSidebar({ user }: AppSidebarProps) {
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-surface border-r border-border h-full">
         {sidebarContent}
       </aside>
 
-      {/* Mobile bottom tab bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex bg-surface border-t border-border h-16 safe-area-bottom">
         {MOBILE_TABS.map((tab) => {
           const active = isNavActive(pathname, tab.href)

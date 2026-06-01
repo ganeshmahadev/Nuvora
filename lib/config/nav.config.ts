@@ -18,12 +18,14 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    label: 'Track',
+    label: 'Log',
     items: [
-      { label: 'Log', href: '/dashboard/log', icon: 'edit_note' },
-      { label: 'Nutrition', href: '/dashboard/nutrition', icon: 'nutrition' },
-      { label: 'Sleep', href: '/dashboard/sleep', icon: 'bedtime' },
-      { label: 'Activity', href: '/dashboard/activity', icon: 'directions_run' },
+      { label: 'Journal', href: '/dashboard/log', icon: 'edit_note' },
+      { label: 'Meals', href: '/dashboard/log/meals', icon: 'restaurant' },
+      { label: 'Water', href: '/dashboard/log/water', icon: 'water_drop' },
+      { label: 'Sleep', href: '/dashboard/log/sleep', icon: 'bedtime' },
+      { label: 'Activity', href: '/dashboard/log/activity', icon: 'directions_run' },
+      { label: 'Weight', href: '/dashboard/log/weight', icon: 'monitor_weight' },
     ],
   },
   {
