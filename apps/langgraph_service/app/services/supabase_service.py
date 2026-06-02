@@ -57,6 +57,8 @@ def upsert_insight(
     structured_data: dict | None = None,
     generation_status: str = "complete",
     completed_at: str | None = None,
+    input_hash: str | None = None,
+    log_count_at_generation: int | None = None,
 ) -> dict:
     client = get_supabase_client()
     payload = {
@@ -70,5 +72,9 @@ def upsert_insight(
         "generation_status": generation_status,
         "completed_at": completed_at,
     }
+    if input_hash is not None:
+        payload["input_hash"] = input_hash
+    if log_count_at_generation is not None:
+        payload["log_count_at_generation"] = log_count_at_generation
     result = client.table("insights").upsert(payload).execute()
     return result.data[0] if result.data else {}

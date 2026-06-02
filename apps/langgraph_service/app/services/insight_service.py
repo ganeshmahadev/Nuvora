@@ -57,7 +57,123 @@ CATEGORY_LOG_QUERIES = {
 }
 
 
+def _fetch_daily_gist_summary(user_id: str, days: int = 7) -> list[dict]:
+    """Aggregate daily summaries from raw log tables, bypassing daily_rollups."""
+    client = get_supabase_client()
+    from_date = (date.today() - timedelta(days=days)).isoformat()
+
+    summaries: dict[str, dict] = {}
+
+    def day(d: str) -> dict:
+        if d not in summaries:
+            summaries[d] = {
+                "date": d,
+                "total_calories": None,
+                "total_protein_g": None,
+                "total_carb_g": None,
+                "total_fat_g": None,
+                "total_water_ml": None,
+                "sleep_duration_minutes": None,
+                "sleep_quality": None,
+                "active_minutes": None,
+                "total_calories_burned": None,
+                "weight_kg": None,
+            }
+        return summaries[d]
+
+    # Water
+    water = (
+        client.table("water_logs")
+        .select("date, amount_ml")
+        .eq("user_id", user_id)
+        .gte("date", from_date)
+        .execute()
+        .data or []
+    )
+    for row in water:
+        s = day(row["date"])
+        s["total_water_ml"] = (s["total_water_ml"] or 0) + (row.get("amount_ml") or 0)
+
+    # Sleep
+    sleep = (
+        client.table("sleep_logs")
+        .select("date, duration_minutes, subjective_quality")
+        .eq("user_id", user_id)
+        .gte("date", from_date)
+        .execute()
+        .data or []
+    )
+    for row in sleep:
+        s = day(row["date"])
+        s["sleep_duration_minutes"] = row.get("duration_minutes")
+        s["sleep_quality"] = row.get("subjective_quality")
+
+    # Activity
+    activity = (
+        client.table("activity_logs")
+        .select("date, duration_minutes, calories_burned")
+        .eq("user_id", user_id)
+        .gte("date", from_date)
+        .execute()
+        .data or []
+    )
+    for row in activity:
+        s = day(row["date"])
+        s["active_minutes"] = (s["active_minutes"] or 0) + (row.get("duration_minutes") or 0)
+        s["total_calories_burned"] = (s["total_calories_burned"] or 0) + (row.get("calories_burned") or 0)
+
+    # Meals + items
+    meals = (
+        client.table("meal_logs")
+        .select("id, date")
+        .eq("user_id", user_id)
+        .gte("date", from_date)
+        .execute()
+        .data or []
+    )
+    if meals:
+        meal_ids = [m["id"] for m in meals]
+        meal_date = {m["id"]: m["date"] for m in meals}
+        items = (
+            client.table("meal_items")
+            .select("meal_log_id, calories_total, protein_g_total, carb_g_total, fat_g_total")
+            .in_("meal_log_id", meal_ids)
+            .execute()
+            .data or []
+        )
+        for item in items:
+            d = meal_date.get(item["meal_log_id"])
+            if not d:
+                continue
+            s = day(d)
+            s["total_calories"] = (s["total_calories"] or 0) + (item.get("calories_total") or 0)
+            s["total_protein_g"] = (s["total_protein_g"] or 0) + (item.get("protein_g_total") or 0)
+            s["total_carb_g"] = (s["total_carb_g"] or 0) + (item.get("carb_g_total") or 0)
+            s["total_fat_g"] = (s["total_fat_g"] or 0) + (item.get("fat_g_total") or 0)
+
+    # Weight (most recent per day)
+    weights = (
+        client.table("weight_logs")
+        .select("date, weight_kg")
+        .eq("user_id", user_id)
+        .gte("date", from_date)
+        .order("date", desc=True)
+        .execute()
+        .data or []
+    )
+    seen: set[str] = set()
+    for row in weights:
+        if row["date"] not in seen:
+            day(row["date"])["weight_kg"] = row.get("weight_kg")
+            seen.add(row["date"])
+
+    return sorted(summaries.values(), key=lambda x: x["date"], reverse=True)
+
+
 def fetch_user_logs(user_id: str, category: str, days: int | None = None) -> list[dict]:
+    if category == "daily_gist":
+        return _fetch_daily_gist_summary(user_id, days or 7)
+
     config = CATEGORY_LOG_QUERIES.get(category)
     if not config:
         log.warning("insight.unknown_category", category=category)
@@ -138,6 +254,9 @@ def get_latest_insight(user_id: str, category: str) -> dict | None:
 
 
 def get_current_log_count(user_id: str, category: str) -> int:
+    if category == "daily_gist":
+        return len(_fetch_daily_gist_summary(user_id, 7))
+
     config = CATEGORY_LOG_QUERIES.get(category)
     if not config:
         return 0
@@ -224,11 +343,11 @@ async def generate_insight(
         structured_data={
             **(structured_data or {}),
             "recommendation": recommendation,
-            "input_hash": input_hash,
-            "log_count_at_generation": current_log_count,
         },
         generation_status="complete",
         completed_at=date.today().isoformat(),
+        input_hash=input_hash,
+        log_count_at_generation=current_log_count,
     )
 
     log.info("insight.generated", user_id=user_id, category=category, insight_id=insight.get("id"))
@@ -244,4 +363,6 @@ async def generate_insight(
         "generation_status": "complete",
         "reference_date": ref_date,
         "created_at": insight.get("created_at"),
+        "input_hash": input_hash,
+        "log_count_at_generation": current_log_count,
     }
