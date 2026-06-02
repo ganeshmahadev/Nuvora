@@ -7,9 +7,9 @@ export function JournalInsightCard() {
     <div className="relative pl-0 md:pl-12">
       <AiInsightCard
         category="daily_gist"
-        title="Nutritional Congruence Detected"
+        title="Daily Health Gist"
         icon="auto_awesome"
-        fallbackDescription="Your nutritional data shows emerging patterns. Keep tracking consistently and we'll identify correlations between your sleep, activity, and nutrition data."
+        fallbackDescription="Keep tracking consistently and we'll surface personalized patterns across your sleep, activity, and nutrition data."
       />
     </div>
   )
