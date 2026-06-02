@@ -1,5 +1,5 @@
-app = "nuvora-langgraph"
-primary_region = "bom"
+app = "nuvaro-agent"
+primary_region = "sin"
 
 [build]
   dockerfile = "Dockerfile"
