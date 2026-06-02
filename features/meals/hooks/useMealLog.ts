@@ -26,6 +26,9 @@ export function useCreateMealLog() {
     mutationFn: (data: CreateMealLogInput) => createMealLog(data),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['meals', variables.date] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'meal_nutrition'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'daily_gist'] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }
@@ -36,6 +39,7 @@ export function useDeleteMealLog() {
     mutationFn: ({ id, date }: { id: string; date: string }) => deleteMealLog(id),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['meals', variables.date] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }
@@ -48,6 +52,8 @@ export function useAddMealItem() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meals'] })
       queryClient.invalidateQueries({ queryKey: ['foods', 'recent'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'meal_nutrition'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'daily_gist'] })
     },
   })
 }

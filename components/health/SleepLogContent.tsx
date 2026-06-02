@@ -183,11 +183,12 @@ function SleepForm({ date }: { date: string }) {
 }
 
 export default function SleepLogContent() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.sleep
 
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+  const _d = new Date(); _d.setDate(_d.getDate() - 7)
+  const sevenDaysAgo = _d.toLocaleDateString('en-CA')
   const { data: sleepHistory } = useMetricHistory('sleep', sevenDaysAgo, today)
   const entries = (sleepHistory ?? []) as SleepEntry[]
   const sleepScore = calcSleepScore(entries)

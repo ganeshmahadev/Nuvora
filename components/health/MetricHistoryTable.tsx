@@ -52,9 +52,9 @@ function formatTimestamp(type: MetricType, entry: any): string {
 }
 
 export function MetricHistoryTable({ config, date }: MetricHistoryTableProps) {
-  const sevenDaysAgo = new Date(date)
+  const sevenDaysAgo = new Date(date + 'T00:00:00')
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-  const from = sevenDaysAgo.toISOString().split('T')[0]
+  const from = sevenDaysAgo.toLocaleDateString('en-CA')
 
   const { data: entries, isLoading } = useMetricHistory(config.type, from, date)
   const deleteMutation = useDeleteMetric(config.type)

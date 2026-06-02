@@ -98,20 +98,29 @@ function ActivityForm({ date }: { date: string }) {
           {errors.duration_minutes && <p className="text-[12px] text-error mt-1">{errors.duration_minutes.message}</p>}
         </div>
         <div className="bg-surface-container-lowest border border-[oklch(95%_0.005_90)] p-5 rounded-xl">
-          <label className="text-[14px] font-medium text-[oklch(48%_0.010_260)] mb-1 block">
-            Intensity (RPE 1-10)
+          <label className="text-[14px] font-medium text-[oklch(48%_0.010_260)] mb-3 block">
+            Intensity
           </label>
-          <div className="flex items-baseline gap-1">
-            <input
-              type="number"
-              min="1"
-              max="10"
-              {...register('intensity_label', { valueAsNumber: true })}
-              className="w-full bg-transparent border-none focus:ring-0 text-[48px] font-light tracking-[-0.04em] text-[oklch(52%_0.150_270)] p-0 tabular-nums"
-            />
-            <span className="text-[14px] text-[oklch(48%_0.010_260)]">/10</span>
+          <div className="flex gap-2">
+            {(['low', 'moderate', 'high'] as const).map((level) => {
+              const isSelected = watch('intensity_label') === level
+              return (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setValue('intensity_label', level, { shouldValidate: true })}
+                  className={cn(
+                    'flex-1 py-2 rounded-lg border text-[13px] font-medium capitalize transition-colors',
+                    isSelected
+                      ? 'border-[oklch(52%_0.150_270)] text-[oklch(52%_0.150_270)] bg-[oklch(52%_0.150_270)]/5'
+                      : 'border-[oklch(90%_0.005_260)] text-[oklch(48%_0.010_260)] hover:border-[oklch(52%_0.150_270)]/40',
+                  )}
+                >
+                  {level}
+                </button>
+              )
+            })}
           </div>
-          <p className="text-[12px] text-[oklch(48%_0.010_260)] mt-1">Moderate: Hard to hold a conversation.</p>
         </div>
       </div>
 
@@ -136,10 +145,10 @@ function ActivityForm({ date }: { date: string }) {
 }
 
 function QuickLogRecent() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const sevenDaysAgo = new Date()
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-  const from = sevenDaysAgo.toISOString().split('T')[0]
+  const from = sevenDaysAgo.toLocaleDateString('en-CA')
   const { data: entries } = useMetricHistory('activity', from, today)
   const recent = (entries ?? []).slice(0, 3) as any[]
 
@@ -190,7 +199,7 @@ function QuickLogRecent() {
 }
 
 export default function ActivityLogContent() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.activity
 

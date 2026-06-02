@@ -272,7 +272,7 @@ function WaterInsightSidebar() {
 }
 
 export default function WaterLogContent() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.water
   const [editingGoal, setEditingGoal] = useState(false)

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Nuvora Health — Know your health at a glance',
-  description: 'Quiet Intelligence. Scandinavian precision health tracking powered by AI.',
+  description: 'Quiet Intelligence and precision health tracking powered by AI.',
 }
 
 export default function RootLayout({

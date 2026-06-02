@@ -13,9 +13,9 @@ import Link from 'next/link'
 import { LogDatePicker } from '@/components/health/LogDatePicker'
 
 function WeightTrendChart({ date }: { date: string }) {
-  const sevenDaysAgo = new Date(date)
+  const sevenDaysAgo = new Date(date + 'T00:00:00')
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 30)
-  const from = sevenDaysAgo.toISOString().split('T')[0]
+  const from = sevenDaysAgo.toLocaleDateString('en-CA')
 
   const { data: entries, isLoading } = useMetricHistory('weight', from, date)
 
@@ -188,7 +188,7 @@ function WeightForm({ date }: { date: string }) {
 }
 
 export default function WeightLogContent() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.weight
   const { data: todayMetrics } = useTodayMetrics()

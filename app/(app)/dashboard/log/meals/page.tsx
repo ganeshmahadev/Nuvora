@@ -8,7 +8,7 @@ import { LogDatePicker } from '@/components/health/LogDatePicker'
 import Link from 'next/link'
 
 export default function MealLoggingPage() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   const [date, setDate] = useState(today)
   const [refreshKey, setRefreshKey] = useState(0)
 

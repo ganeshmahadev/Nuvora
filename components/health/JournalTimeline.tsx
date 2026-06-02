@@ -200,9 +200,13 @@ interface JournalTimelineProps {
 }
 
 export function JournalTimeline({ filter }: JournalTimelineProps) {
+  const today = new Date().toLocaleDateString('en-CA')
+  const fromDate = new Date(); fromDate.setDate(fromDate.getDate() - 29)
+  const from = fromDate.toLocaleDateString('en-CA')
+
   const { data: days, isLoading, error, refetch } = useQuery({
-    queryKey: ['logs', 'recent', filter],
-    queryFn: () => getRecentLogs(),
+    queryKey: ['logs', 'recent', 30],
+    queryFn: () => getRecentLogs(from, today, 30),
     staleTime: 30_000,
   })
 

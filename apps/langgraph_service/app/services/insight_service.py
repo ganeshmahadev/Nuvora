@@ -9,7 +9,7 @@ import structlog
 
 from app.config import settings
 from app.services.llm_service import structured_call
-from app.services.supabase_service import get_supabase_client, upsert_insight, get_user_location
+from app.services.supabase_service import get_supabase_client, upsert_insight, get_user_location, get_profile
 from app.schemas.insight import InsightData, InsufficientDataResponse
 
 log = structlog.get_logger()
@@ -315,8 +315,12 @@ async def generate_insight(
     if category == "water_hydration":
         location_city = get_user_location(user_id)
         temp_c = fetch_temperature(location_city) if location_city else None
+        profile = get_profile(user_id)
+        water_target_ml = (profile or {}).get("water_target_ml")
+        water_target_str = str(int(water_target_ml)) if water_target_ml else "unknown"
         prompt = prompt.replace("{{location_city}}", location_city or "unknown")
         prompt = prompt.replace("{{temperature_c}}", f"{temp_c:.1f}" if temp_c is not None else "unknown")
+        prompt = prompt.replace("{{water_target_ml}}", water_target_str)
 
     try:
         llm_result = await structured_call(prompt, InsightData, inputs={"logs": logs, "category": category})

@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { MetricType } from '@/lib/config/metrics.config'
+import { localDate } from '@/lib/utils'
 import {
   getMetricHistory,
   logWater,
@@ -27,7 +28,7 @@ export function useMetricHistory(type: MetricType, from: string, to: string) {
 }
 
 export function useTodayMetrics() {
-  const today = new Date().toISOString().split('T')[0]
+  const today = localDate()
   return useQuery<DailyMetrics | null>({
     queryKey: ['metrics', 'today', today],
     queryFn: () => getTodayMetrics(),
@@ -42,6 +43,9 @@ export function useLogWater() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics', 'water'] })
       queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'water_hydration'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'daily_gist'] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }
@@ -53,6 +57,9 @@ export function useLogWeight() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics', 'weight'] })
       queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'weight_trend'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'daily_gist'] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }
@@ -64,6 +71,9 @@ export function useLogSleep() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics', 'sleep'] })
       queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'sleep_hygiene'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'daily_gist'] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }
@@ -75,6 +85,9 @@ export function useLogActivity() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics', 'activity'] })
       queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'activity_recommendation'] })
+      queryClient.invalidateQueries({ queryKey: ['insights', 'daily_gist'] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }
@@ -86,6 +99,7 @@ export function useDeleteMetric(type: MetricType) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metrics', type] })
       queryClient.invalidateQueries({ queryKey: ['metrics', 'today'] })
+      queryClient.invalidateQueries({ queryKey: ['logs', 'recent'] })
     },
   })
 }

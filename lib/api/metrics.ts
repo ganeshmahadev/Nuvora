@@ -111,7 +111,7 @@ export async function deleteMetric(type: MetricType, id: string): Promise<void> 
 }
 
 export async function getTodayMetrics(): Promise<DailyMetrics | null> {
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date().toLocaleDateString('en-CA')
   try {
     return await apiFetch(`/api/metrics/today?date=${today}`)
   } catch {
