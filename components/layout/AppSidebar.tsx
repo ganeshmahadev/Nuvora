@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -179,16 +180,20 @@ export function AppSidebar({ user }: AppSidebarProps) {
             expanded ? 'px-4 py-5' : 'justify-center px-0 py-5',
           )}
         >
-          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
-            <span className="text-on-primary text-[13px] font-bold tracking-tight">N</span>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Nuvora"
+            width={28}
+            height={28}
+            className="flex-shrink-0"
+          />
           <span
             className={cn(
-              'text-[15px] font-semibold tracking-[-0.02em] text-fg whitespace-nowrap transition-opacity duration-150',
+              'text-sm font-bold text-primary uppercase tracking-tight whitespace-nowrap transition-opacity duration-150',
               expanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden',
             )}
           >
-            Nuvora
+            Nuvora Health
           </span>
         </div>
 
@@ -237,7 +242,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       </aside>
 
       {/* Mobile bottom tabs — 4 items */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex bg-transparent border-t border-border/50 h-16 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex bg-surface border-t border-border h-16 safe-area-bottom">
         {MOBILE_TABS.map((tab) => {
           const active = tab.href ? isActive(pathname, tab.href) : false
           return (

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LandingPage() {
   const demoCardRef = useRef<HTMLDivElement>(null)
@@ -57,7 +58,7 @@ export default function LandingPage() {
       {/* ── Header ── */}
       <header className="fixed top-0 left-0 w-full z-40 flex justify-between items-center px-5 md:px-[120px] h-16 bg-bg/80 backdrop-blur-md border-b border-border">
         <div className="flex items-center gap-2">
-          <span className="text-xl font-semibold tracking-tight text-fg">Nuvora</span>
+        <span className="text-sm font-bold text-primary uppercase tracking-tight">Nuvora Health</span>
         </div>
         <nav className="hidden md:flex gap-10 items-center">
           <a className="text-sm font-medium text-primary hover:opacity-80 transition-opacity" href="#overview">Overview</a>
@@ -79,10 +80,7 @@ export default function LandingPage() {
         {/* ── Hero ── */}
         <section id="overview" className="relative min-h-[90vh] flex items-center justify-center px-5 md:px-[120px]">
           <div className="max-w-4xl text-center space-y-6 relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container rounded-full mb-2">
-              <span className="material-symbols-outlined text-primary text-lg">verified</span>
-              <span className="text-[11px] font-semibold text-fg-muted uppercase tracking-widest">Scandinavian Engineering</span>
-            </div>
+            
 
             <h1
               data-reveal
@@ -110,12 +108,6 @@ export default function LandingPage() {
                 className="w-full md:w-auto bg-primary text-white px-16 py-6 rounded-full text-sm font-medium hover:scale-105 transition-transform"
               >
                 Start Your Journey
-              </Link>
-              <Link
-                href="/auth/sign-in"
-                className="w-full md:w-auto border border-primary text-primary px-16 py-6 rounded-full text-sm font-medium hover:bg-surface-low transition-colors"
-              >
-                View Demo
               </Link>
             </div>
           </div>
@@ -174,11 +166,15 @@ export default function LandingPage() {
                     what matters, using generous whitespace and a rhythmic, predictable interface.
                   </p>
                 </div>
-                <div className="md:w-1/2 w-full aspect-video bg-surface-low rounded-lg overflow-hidden flex items-center justify-center border border-border/30">
-                  <div className="w-full h-full bg-gradient-to-br from-surface-container via-surface-low to-surface-container flex flex-col items-center justify-center gap-4 opacity-60">
-                    <span className="material-symbols-outlined text-5xl text-border">landscape</span>
-                    <span className="text-sm text-fg-subtle tracking-widest uppercase">Calm by design</span>
-                  </div>
+                <div className="md:w-1/2 w-full aspect-video bg-surface-low rounded-lg overflow-hidden border border-border/30 relative">
+                  <Image
+                    src="/images/calm-visual.jpg"
+                    alt="Calm foggy forest landscape — visual calm by design"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    priority
+                  />
                 </div>
               </div>
             </div>
@@ -197,67 +193,47 @@ export default function LandingPage() {
           </div>
 
           <div className="max-w-3xl mx-auto relative">
-            {/* Demo card */}
+            {/* Demo card — matches AiInsightCard format */}
             <div
               ref={demoCardRef}
               onMouseMove={handleCardMouseMove}
               onMouseLeave={handleCardMouseLeave}
-              className="bg-white rounded-xl p-10 relative z-20 cursor-pointer transition-transform duration-300"
+              className="bg-surface-container-lowest border border-[oklch(52%_0.150_270)]/20 rounded-xl p-5 relative z-20 cursor-pointer transition-transform duration-300 overflow-hidden"
               style={{
-                border: '0.5px solid rgba(64, 92, 255, 0.2)',
-                boxShadow: '0 20px 40px -10px rgba(64, 92, 255, 0.1)',
+                boxShadow: '0 20px 40px -10px rgba(28,63,231,0.12)',
               }}
             >
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-ai/10 flex items-center justify-center">
-                    <span
-                      className="material-symbols-outlined text-ai"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      colors_spark
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-fg">Daily Summary</p>
-                    <p className="text-xs font-semibold text-fg-muted tracking-wide">AI-Generated · 2m ago</p>
-                  </div>
-                </div>
-                <div className="px-3 py-1 bg-surface-high rounded-full">
-                  <span className="text-xs font-semibold text-primary tracking-wide">High Recovery</span>
-                </div>
-              </div>
+              <div className="absolute -top-16 -right-16 w-48 h-48 bg-[oklch(52%_0.150_270)]/8 rounded-full blur-3xl pointer-events-none" />
+              <svg
+                className="absolute top-3 right-3 w-5 h-5 text-[oklch(52%_0.150_270)]/30 pointer-events-none"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+              </svg>
 
-              <div className="space-y-6">
-                <div className="flex items-end gap-6">
-                  <span className="text-[48px] leading-[56px] font-light tracking-[-0.04em] text-primary">82%</span>
-                  <div className="pb-2">
-                    <span className="text-[11px] font-semibold text-fg-muted block uppercase tracking-wider">Readiness Score</span>
-                    <div className="h-1 w-32 bg-border rounded-full mt-1 overflow-hidden">
-                      <div className="h-full bg-primary rounded-full" style={{ width: '82%' }} />
-                    </div>
-                  </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className="material-symbols-outlined text-[20px] text-[oklch(52%_0.150_270)]"
+                    style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}
+                  >
+                    auto_awesome
+                  </span>
+                  <h3 className="text-[12px] font-bold uppercase tracking-[0.08em] text-[oklch(52%_0.150_270)]">
+                    Daily Health Gist
+                  </h3>
                 </div>
 
-                <p
-                  data-reveal
-                  className="opacity-0 translate-y-4 text-base text-fg leading-relaxed text-left border-l-2 border-primary/20 pl-4 italic"
-                >
-                  &quot;You are exceptionally well-rested today. Your heart rate variability (HRV) is
-                  15% above your baseline, suggesting a high-intensity session would be beneficial.&quot;
+                <p className="text-[15px] text-[oklch(14%_0.012_260)] leading-relaxed mb-3">
+                  You are exceptionally well-rested today. Your heart rate variability (HRV) is
+                  15% above your baseline, suggesting a high-intensity session would be beneficial.
                 </p>
 
-                <div className="grid grid-cols-3 gap-6 pt-2 border-t border-border/30">
-                  {[
-                    { label: 'Sleep Quality', value: 'Optimal' },
-                    { label: 'Resting HR', value: '54 BPM' },
-                    { label: 'Metabolic Stage', value: 'Balanced' },
-                  ].map(({ label, value }) => (
-                    <div key={label} data-reveal className="opacity-0 translate-y-4">
-                      <span className="text-[11px] font-semibold text-fg-muted block uppercase tracking-wider">{label}</span>
-                      <span className="text-2xl font-medium text-fg">{value}</span>
-                    </div>
-                  ))}
+                <div className="border-t border-[oklch(90%_0.005_260)]/50 pt-3">
+                  <p className="text-[13px] text-[oklch(48%_0.010_260)] italic">
+                    Consider scheduling your workout between 9:00 PM and 10:30 PM tonight for optimal recovery.
+                  </p>
                 </div>
               </div>
             </div>
@@ -274,10 +250,6 @@ export default function LandingPage() {
             <h2 data-reveal className="opacity-0 translate-y-4 text-[40px] font-semibold text-fg mb-6 tracking-tight">
               Ready to experience quiet intelligence?
             </h2>
-            <p data-reveal className="opacity-0 translate-y-4 text-lg text-fg-muted mb-10">
-              Join 20,000+ individuals who have refined their health with Nuvora&apos;s
-              Scandinavian precision.
-            </p>
             <div data-reveal className="opacity-0 translate-y-4 flex flex-col md:flex-row gap-6 justify-center">
               <Link
                 href="/auth/sign-up"
@@ -294,8 +266,6 @@ export default function LandingPage() {
       <footer className="w-full py-6 px-5 md:px-[120px] flex flex-col md:flex-row justify-between items-center bg-surface border-t border-border">
         <div className="flex items-center gap-1.5 mb-4 md:mb-0">
           <span className="text-sm font-bold text-primary uppercase tracking-tight">Nuvora Health</span>
-          <span className="text-fg-muted mx-3 opacity-30">|</span>
-          <span className="text-base text-fg-muted">© 2024. Scandinavian Precision.</span>
         </div>
         <div className="flex gap-10">
           {['Terms', 'Privacy', 'Support', 'Contact'].map((link) => (
