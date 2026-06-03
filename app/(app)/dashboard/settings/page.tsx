@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useProfile, useUpdateProfile, type ProfileData } from '@/features/profile/hooks/useProfile'
 import { useRecentLogs } from '@/features/logs/hooks/useRecentLogs'
+import { useMetricHistory } from '@/features/metrics/hooks/useMetricLog'
+import type { WeightEntry } from '@/lib/api/metrics'
 import { useInsight } from '@/features/insights/hooks/useInsight'
+import { localDate } from '@/lib/utils'
 
 function computeBmi(weightKg: number | null, heightCm: number | null): string {
   if (!weightKg || !heightCm) return '—'
@@ -171,6 +174,12 @@ export default function SettingsPage() {
   const { data: logsData } = useRecentLogs(1)
   const { data: insight } = useInsight('daily_gist')
 
+  const today = localDate()
+  const thirtyDaysAgo = new Date(today + 'T00:00:00')
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  const { data: recentWeights } = useMetricHistory('weight', thirtyDaysAgo.toLocaleDateString('en-CA'), today)
+  const latestLoggedWeight = (recentWeights as WeightEntry[] | undefined)?.[0]?.weight_kg ?? null
+
   const [form, setForm] = useState<Record<string, string>>({})
   const [showDevApi, setShowDevApi] = useState(false)
   const devRef = useRef<HTMLDivElement>(null)
@@ -207,7 +216,7 @@ export default function SettingsPage() {
   const [waterLiters, setWaterLiters] = useState('')
 
   const bmiValue = computeBmi(
-    form.weight_kg ? parseFloat(form.weight_kg) : null,
+    latestLoggedWeight ?? (form.weight_kg ? parseFloat(form.weight_kg) : null),
     form.height_cm ? parseFloat(form.height_cm) : null,
   )
 

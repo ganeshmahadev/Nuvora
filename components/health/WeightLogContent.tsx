@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useLogWeight, useMetricHistory, useTodayMetrics } from '@/features/metrics/hooks/useMetricLog'
+import { useLogWeight, useMetricHistory } from '@/features/metrics/hooks/useMetricLog'
 import { logWeightSchema, type LogWeightValues } from '@/features/metrics/schemas/metric.schema'
 import type { WeightEntry } from '@/lib/api/metrics'
+import { useProfile } from '@/features/profile/hooks/useProfile'
 import { AiInsightCard } from '@/components/health/AiInsightCard'
 import { MetricHistoryTable } from '@/components/health/MetricHistoryTable'
 import { METRIC_CONFIGS } from '@/lib/config/metrics.config'
+import { localDate } from '@/lib/utils'
 import Link from 'next/link'
 import { LogDatePicker } from '@/components/health/LogDatePicker'
 
@@ -61,8 +63,9 @@ function WeightTrendChart({ date }: { date: string }) {
   )
 }
 
-function BmiCard({ weightKg }: { weightKg: number | null }) {
-  const bmi = weightKg ? (weightKg / (1.75 * 1.75)).toFixed(1) : null
+function BmiCard({ weightKg, heightCm }: { weightKg: number | null; heightCm: number | null }) {
+  const heightM = heightCm ? heightCm / 100 : null
+  const bmi = (weightKg && heightM) ? (weightKg / (heightM * heightM)).toFixed(1) : null
   const category = bmi
     ? Number(bmi) < 18.5 ? 'Underweight'
       : Number(bmi) < 25 ? 'Normal'
@@ -71,6 +74,10 @@ function BmiCard({ weightKg }: { weightKg: number | null }) {
     : null
   const categoryColor = category === 'Normal' ? 'text-primary' : category === 'Underweight' ? 'text-[oklch(52%_0.150_270)]' : 'text-warning'
   const pct = bmi ? Math.min((Number(bmi) / 40) * 100, 100) : 0
+
+  const emptyMessage = !heightCm
+    ? 'Set your height in profile settings to see BMI.'
+    : 'Log your weight to see BMI estimate.'
 
   return (
     <div className="bg-surface-container-lowest border border-[oklch(95%_0.005_90)] rounded-xl p-5">
@@ -94,10 +101,10 @@ function BmiCard({ weightKg }: { weightKg: number | null }) {
             <span>Overweight</span>
             <span>Obese</span>
           </div>
-          <p className="text-[12px] text-[oklch(48%_0.010_260)]">Based on estimated height of 175cm. Update your profile for precision.</p>
+          <p className="text-[12px] text-[oklch(48%_0.010_260)]">Based on your height of {heightCm}cm.</p>
         </div>
       ) : (
-        <p className="text-[13px] text-[oklch(48%_0.010_260)]">Log your weight to see BMI estimate.</p>
+        <p className="text-[13px] text-[oklch(48%_0.010_260)]">{emptyMessage}</p>
       )}
     </div>
   )
@@ -192,10 +199,15 @@ function WeightForm({ date }: { date: string }) {
 }
 
 export default function WeightLogContent() {
-  const today = new Date().toLocaleDateString('en-CA')
+  const today = localDate()
   const [date, setDate] = useState(today)
   const config = METRIC_CONFIGS.weight
-  const { data: todayMetrics } = useTodayMetrics()
+  const { data: profile } = useProfile()
+
+  const thirtyDaysAgo = new Date(today + 'T00:00:00')
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+  const { data: recentWeights } = useMetricHistory('weight', thirtyDaysAgo.toLocaleDateString('en-CA'), today)
+  const latestWeight = (recentWeights as WeightEntry[] | undefined)?.[0]?.weight_kg ?? null
 
   return (
     <div className="px-4 md:px-6 lg:px-8 py-6 max-w-[1280px] mx-auto">
@@ -234,7 +246,7 @@ export default function WeightLogContent() {
         <div className="lg:col-span-8 space-y-5">
           <WeightForm date={date} />
           <WeightTrendChart date={date} />
-          <BmiCard weightKg={todayMetrics?.weight_kg ?? null} />
+          <BmiCard weightKg={latestWeight} heightCm={profile?.height_cm ?? null} />
           <div className="bg-surface-container-lowest border border-[oklch(95%_0.005_90)] rounded-xl p-5">
             <MetricHistoryTable config={config} date={date} />
           </div>
