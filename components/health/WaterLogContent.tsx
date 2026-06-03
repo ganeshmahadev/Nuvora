@@ -83,10 +83,14 @@ function WaterProgressViz({ currentMl, targetMl }: { currentMl: number; targetMl
 
 function WaterForm({ date }: { date: string }) {
   const logWater = useLogWater()
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<LogWaterValues>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<LogWaterValues>({
     resolver: zodResolver(logWaterSchema),
     defaultValues: { date, amount_ml: 250 },
   })
+
+  useEffect(() => {
+    setValue('date', date)
+  }, [date, setValue])
 
   function handleQuickAdd(ml: number) {
     logWater.mutate(
@@ -278,11 +282,11 @@ export default function WaterLogContent() {
   const [editingGoal, setEditingGoal] = useState(false)
   const [goalInput, setGoalInput] = useState('')
 
-  const { data: todayMetrics } = useTodayMetrics()
+  const { data: dateMetrics } = useTodayMetrics(date)
   const { data: profile } = useProfile()
   const updateProfile = useUpdateProfile()
 
-  const currentMl = todayMetrics?.total_water_ml ?? 0
+  const currentMl = dateMetrics?.total_water_ml ?? 0
   const targetMl = profile?.water_target_ml ?? config.defaultTarget ?? 2500
 
   function saveGoal() {

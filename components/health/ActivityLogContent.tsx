@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLogActivity, useMetricHistory } from '@/features/metrics/hooks/useMetricLog'
@@ -19,6 +19,10 @@ function ActivityForm({ date }: { date: string }) {
     resolver: zodResolver(logActivitySchema),
     defaultValues: { date, activity_type: undefined, duration_minutes: 30, intensity_label: null, calories_burned: null, notes: null },
   })
+
+  useEffect(() => {
+    setValue('date', date)
+  }, [date, setValue])
 
   const selectedType = watch('activity_type')
   const filteredTypes = ACTIVITY_TYPES.filter((t) =>

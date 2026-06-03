@@ -5,6 +5,9 @@ Analyze the user's recent activity data and generate a personalized activity ins
 **User's recent activity logs (most recent first)**:
 {{inputs}}
 
+**Pre-computed analysis** (patterns already extracted — use these to ground your insight):
+{{analysis}}
+
 **Instructions**:
 1. Identify patterns in activity types, durations, intensity levels, and frequency
 2. Note if the user has a dominant activity type or good variety

@@ -15,6 +15,9 @@ supabase
 # HTTP
 httpx
 
+# Graph orchestration
+langgraph>=0.2
+
 # Reliability
 tenacity==9.0.0
 

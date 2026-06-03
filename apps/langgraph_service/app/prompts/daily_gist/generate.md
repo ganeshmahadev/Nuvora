@@ -5,6 +5,9 @@ Analyze the user's recent daily health rollup data and generate a personalized d
 **User's recent daily rollup data (most recent first)**:
 {{inputs}}
 
+**Pre-computed analysis** (patterns already extracted — use these to ground your insight):
+{{analysis}}
+
 **Data columns**:
 - date: the calendar date
 - total_calories: daily caloric intake (kcal)

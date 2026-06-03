@@ -5,6 +5,9 @@ Analyze the user's recent meal data and generate a personalized nutrition insigh
 **User's recent meal logs (most recent first)**:
 {{inputs}}
 
+**Pre-computed analysis** (patterns already extracted — use these to ground your insight):
+{{analysis}}
+
 **Instructions**:
 1. Identify patterns in meal timing, macro distribution, and variety
 2. Note any macro gaps (e.g., low protein, high carb days)

@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { useInsight } from '@/features/insights/hooks/useInsight'
 import { useRecentLogs } from '@/features/logs/hooks/useRecentLogs'
 import type { LogEntry } from '@/lib/api/logs'
+import { localDate } from '@/lib/utils'
 
 const LOG_CARDS = [
   {
@@ -158,14 +159,15 @@ function LogCard({
 export default function HomePage() {
   const { data: logsData, isLoading: logsLoading } = useRecentLogs(7)
   const { data: insight, isLoading: insightLoading } = useInsight('daily_gist')
+  const today = localDate()
 
   const recentEntries = useMemo(() => {
     if (!logsData) return []
-    return logsData
-      .flatMap((day) => day.entries)
+    const todayLog = logsData.find((day) => day.date === today)
+    return (todayLog?.entries ?? [])
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 5)
-  }, [logsData])
+  }, [logsData, today])
 
   return (
     <div className="px-5 md:px-8 lg:px-12 py-8 max-w-[1200px] mx-auto">

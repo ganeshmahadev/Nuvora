@@ -11,6 +11,9 @@ Analyze the user's recent water intake data and generate a personalized insight.
 - Location: {{location_city}}
 - Current ambient temperature: {{temperature_c}}°C
 
+**Pre-computed analysis** (patterns already extracted — use these to ground your insight):
+{{analysis}}
+
 **Instructions**:
 1. Identify patterns in timing, amounts, and consistency of water intake
 2. Factor in ambient temperature: above 30°C increases fluid needs by ~400–600 ml/day; 25–30°C by ~200–400 ml/day; below 20°C no adjustment needed

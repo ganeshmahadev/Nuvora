@@ -5,6 +5,9 @@ Analyze the user's recent sleep data and generate a personalized sleep quality i
 **User's recent sleep logs (most recent first)**:
 {{inputs}}
 
+**Pre-computed analysis** (patterns already extracted — use these to ground your insight):
+{{analysis}}
+
 **Instructions**:
 1. Identify patterns in bed times, wake times, duration, and quality scores
 2. If bed/wake times are inconsistent, note the variability

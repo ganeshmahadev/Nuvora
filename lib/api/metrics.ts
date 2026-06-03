@@ -110,10 +110,10 @@ export async function deleteMetric(type: MetricType, id: string): Promise<void> 
   await apiFetch(`/api/metrics/${type}/${id}`, { method: 'DELETE' })
 }
 
-export async function getTodayMetrics(): Promise<DailyMetrics | null> {
-  const today = new Date().toLocaleDateString('en-CA')
+export async function getTodayMetrics(date?: string): Promise<DailyMetrics | null> {
+  const d = date ?? new Date().toLocaleDateString('en-CA')
   try {
-    return await apiFetch(`/api/metrics/today?date=${today}`)
+    return await apiFetch(`/api/metrics/today?date=${d}`)
   } catch {
     return null
   }

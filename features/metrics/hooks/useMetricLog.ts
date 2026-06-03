@@ -27,11 +27,12 @@ export function useMetricHistory(type: MetricType, from: string, to: string) {
   })
 }
 
-export function useTodayMetrics() {
+export function useTodayMetrics(date?: string) {
   const today = localDate()
+  const targetDate = date ?? today
   return useQuery<DailyMetrics | null>({
-    queryKey: ['metrics', 'today', today],
-    queryFn: () => getTodayMetrics(),
+    queryKey: ['metrics', 'today', targetDate],
+    queryFn: () => getTodayMetrics(targetDate),
     staleTime: 60_000,
   })
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLogSleep, useMetricHistory, type SleepEntry } from '@/features/metrics/hooks/useMetricLog'
@@ -97,10 +97,14 @@ function SleepScoreCircle({ score, count }: { score: number | null; count: numbe
 function SleepForm({ date }: { date: string }) {
   const logSleep = useLogSleep()
   const [quality, setQuality] = useState(7)
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<LogSleepValues>({
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<LogSleepValues>({
     resolver: zodResolver(logSleepSchema),
     defaultValues: { date, bed_time: '22:30', wake_time: '06:45', subjective_quality: 7, notes: null },
   })
+
+  useEffect(() => {
+    setValue('date', date)
+  }, [date, setValue])
 
   function onSubmit(data: LogSleepValues) {
     logSleep.mutate(

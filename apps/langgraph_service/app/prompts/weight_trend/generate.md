@@ -5,6 +5,9 @@ Analyze the user's recent weight measurements and generate a personalized trend 
 **User's recent weight logs (most recent first)**:
 {{inputs}}
 
+**Pre-computed analysis** (patterns already extracted — use these to ground your insight):
+{{analysis}}
+
 **Instructions**:
 1. Calculate the trend direction (gaining, losing, stable) and rate of change
 2. If there's a meaningful trend, quantify it (e.g., "0.3kg/week decline")

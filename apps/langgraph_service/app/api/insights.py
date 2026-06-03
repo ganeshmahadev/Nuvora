@@ -4,11 +4,8 @@ import structlog
 from app.auth import verify_service_token
 from app.config import settings
 from app.schemas.insight import InsightGenerateRequest, INSIGHT_CATEGORIES
-from app.services.insight_service import (
-    generate_insight,
-    get_latest_insight,
-    get_current_log_count,
-)
+from app.services.insight_service import generate_insight, get_latest_insight
+from app.services.data_service import get_current_log_count
 
 log = structlog.get_logger()
 router = APIRouter()

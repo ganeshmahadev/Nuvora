@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLogWeight, useMetricHistory, useTodayMetrics } from '@/features/metrics/hooks/useMetricLog'
@@ -106,10 +106,14 @@ function BmiCard({ weightKg }: { weightKg: number | null }) {
 function WeightForm({ date }: { date: string }) {
   const logWeight = useLogWeight()
   const [unit, setUnit] = useState<'kg' | 'lbs'>('kg')
-  const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<LogWeightValues>({
+  const { register, handleSubmit, watch, reset, setValue, formState: { errors } } = useForm<LogWeightValues>({
     resolver: zodResolver(logWeightSchema),
     defaultValues: { date, weight_kg: undefined, notes: null },
   })
+
+  useEffect(() => {
+    setValue('date', date)
+  }, [date, setValue])
 
   function onSubmit(data: LogWeightValues) {
     const submitData = { ...data }
